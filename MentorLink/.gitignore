@@ -1,0 +1,52 @@
+# ============================================================
+# Laravel - MentorLink
+# ============================================================
+
+# --- Environnement & Clés sensibles ---
+.env
+.env.*
+!.env.example
+*.key
+auth.json
+
+# --- Dépendances (régénérables) ---
+/vendor/
+/node_modules/
+
+# --- Build frontend ---
+/public/build/
+/public/hot
+/public/storage
+
+# --- Cache applicatif ---
+/bootstrap/cache/*.php
+/.phpunit.cache
+.phpunit.result.cache
+
+# --- Storage (logs, sessions, cache, vues compilées) ---
+/storage/logs/*.log
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/framework/testing/*
+/storage/app/public/*
+
+# --- Fichiers temporaires Composer ---
+/vendor/composer/tmp-*.zip
+
+# --- Config locale Homestead / Sail ---
+Homestead.json
+Homestead.yaml
+.vagrant/
+
+# --- IDE & Éditeurs ---
+/.idea/
+/.vscode/
+/.fleet/
+*.suo
+*.sw?
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+Desktop.ini
