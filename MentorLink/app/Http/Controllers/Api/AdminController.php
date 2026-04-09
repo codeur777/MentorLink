@@ -30,6 +30,17 @@ class AdminController extends Controller
             ->take(10)
             ->values();
 
+        // Sessions par domaine — on dénormalise depuis mentor_profiles
+        $sessionsByDomain = MentorSession::with('mentor.mentorProfile')
+            ->get()
+            ->flatMap(function ($session) {
+                $domains = optional($session->mentor->mentorProfile)->domains ?? [];
+                return collect($domains)->map(fn($domain) => $domain);
+            })
+            ->countBy()
+            ->sortDesc()
+            ->all();
+
         return response()->json([
             'total_users'         => User::count(),
             'total_mentors'       => User::where('role', 'mentor')->count(),
@@ -38,6 +49,7 @@ class AdminController extends Controller
             'total_sessions'      => MentorSession::count(),
             'sessions_by_status'  => MentorSession::selectRaw('status, count(*) as total')
                                         ->groupBy('status')->pluck('total', 'status'),
+            'sessions_by_domain'  => $sessionsByDomain,
             'top_mentors'         => $topMentors,
         ]);
     }

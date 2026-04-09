@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAvailabilityRequest;
+use App\Http\Requests\UpdateAvailabilityRequest;
 use App\Models\Availability;
 use App\Services\AvailabilityService;
 use Carbon\Carbon;
@@ -70,5 +71,28 @@ class AvailabilityController extends Controller
         $availability->delete();
 
         return response()->json(null, 204);
+    }
+
+    /**
+     * @OA\Put(path="/api/availabilities/{id}", summary="Modifier un créneau", tags={"Disponibilités"}, security={{"bearerAuth":{}}},
+     *   @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *   @OA\RequestBody(required=false, @OA\JsonContent(
+     *     @OA\Property(property="day_of_week", type="integer", example=2),
+     *     @OA\Property(property="start_time", type="string", example="10:00"),
+     *     @OA\Property(property="end_time", type="string", example="12:00")
+     *   )),
+     *   @OA\Response(response=200, description="Créneau mis à jour"),
+     *   @OA\Response(response=403, description="Non autorisé")
+     * )
+     */
+    public function update(UpdateAvailabilityRequest $request, Availability $availability): JsonResponse
+    {
+        if ($availability->mentor_id !== $request->user()->id) {
+            return response()->json(['message' => 'Non autorisé.'], 403);
+        }
+
+        $availability->update($request->only(['day_of_week', 'start_time', 'end_time']));
+
+        return response()->json($availability->fresh());
     }
 }

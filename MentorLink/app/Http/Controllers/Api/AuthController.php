@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RegisterRequest;
+use App\Http\Requests\UpdateProfileRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @OA\Info(title="MentorLink API", version="1.0.0", description="API RESTful MentorLink — Auth via Bearer token (Sanctum)")
@@ -86,5 +88,37 @@ class AuthController extends Controller
     public function me(Request $request): JsonResponse
     {
         return response()->json($request->user());
+    }
+
+    /**
+     * @OA\Post(path="/api/profile", summary="Mettre à jour son profil (nom, bio, avatar)", tags={"Auth"}, security={{"bearerAuth":{}}},
+     *   @OA\RequestBody(required=false,
+     *     @OA\MediaType(mediaType="multipart/form-data",
+     *       @OA\Schema(
+     *         @OA\Property(property="name", type="string"),
+     *         @OA\Property(property="bio", type="string"),
+     *         @OA\Property(property="avatar", type="string", format="binary")
+     *       )
+     *     )
+     *   ),
+     *   @OA\Response(response=200, description="Profil mis à jour")
+     * )
+     */
+    public function updateProfile(UpdateProfileRequest $request): JsonResponse
+    {
+        $user = $request->user();
+        $data = $request->only(['name', 'bio']);
+
+        if ($request->hasFile('avatar')) {
+            // Supprimer l'ancien avatar s'il existe
+            if ($user->avatar) {
+                Storage::disk('public')->delete($user->avatar);
+            }
+            $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
+        }
+
+        $user->update($data);
+
+        return response()->json($user->fresh());
     }
 }

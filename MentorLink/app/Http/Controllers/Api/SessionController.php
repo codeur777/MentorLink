@@ -102,4 +102,19 @@ class SessionController extends Controller
 
         return response()->json(['message' => 'Session terminée.', 'session' => $session]);
     }
+
+    /**
+     * @OA\Put(path="/api/sessions/{id}/refuse", summary="[Mentor] Refuser une demande de session", tags={"Sessions"}, security={{"bearerAuth":{}}},
+     *   @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *   @OA\Response(response=200, description="Session refusée"),
+     *   @OA\Response(response=403, description="Réservé au mentor / session déjà traitée")
+     * )
+     */
+    public function refuse(MentorSession $session): JsonResponse
+    {
+        $this->authorize('refuse', $session);
+        $session->update(['status' => 'annulee']);
+
+        return response()->json(['message' => 'Demande de session refusée.', 'session' => $session]);
+    }
 }

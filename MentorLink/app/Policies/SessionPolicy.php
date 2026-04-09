@@ -12,6 +12,12 @@ class SessionPolicy
         return $user->id === $session->mentor_id;
     }
 
+    public function refuse(User $user, MentorSession $session): bool
+    {
+        return $user->id === $session->mentor_id
+            && $session->status === 'en_attente';
+    }
+
     public function cancel(User $user, MentorSession $session): bool
     {
         return in_array($user->id, [$session->mentor_id, $session->mentee_id])

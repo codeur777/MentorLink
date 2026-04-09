@@ -1,158 +1,66 @@
-# MentorLink API
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-Plateforme de mentorat académique — backend RESTful Laravel.
-Développé dans le cadre du cours Outils de Programmation Web — IAI-Togo GLSI-3.
+<p align="center">
+<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+</p>
 
----
+## About Laravel
 
-## Stack technique
+Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web applications, such as:
 
-- PHP 8.5 / Laravel 10
-- MySQL 9.1
-- Laravel Sanctum (authentification par token)
-- Laravel Breeze (scaffold auth)
-- L5-Swagger (documentation OpenAPI)
+- [Simple, fast routing engine](https://laravel.com/docs/routing).
+- [Powerful dependency injection container](https://laravel.com/docs/container).
+- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+- [Robust background job processing](https://laravel.com/docs/queues).
+- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
----
+Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-## Installation
+## Learning Laravel
 
-### Prérequis
+Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it getting started with the framework a breeze.
 
-- PHP >= 8.1 avec extensions : `pdo_mysql`, `zip`, `mbstring`, `openssl`
-- Composer
-- MySQL
-- Node.js + npm
+You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
 
-### Étapes
+If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, Vue, and React. Boost your skills by digging into our comprehensive video library.
 
-```bash
-# 1. Cloner le projet
-git clone https://github.com/[votre-repo]/mentorlink.git
-cd mentorlink
+## Laravel Sponsors
 
-# 2. Installer les dépendances PHP
-composer install
+We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
 
-# 3. Installer les dépendances JS
-npm install && npm run build
+### Premium Partners
 
-# 4. Configurer l'environnement
-cp .env.example .env
-php artisan key:generate
+- **[Vehikl](https://vehikl.com/)**
+- **[Tighten Co.](https://tighten.co)**
+- **[WebReinvent](https://webreinvent.com/)**
+- **[Kirschbaum Development Group](https://kirschbaum.com)**
+- **[64 Robots](https://64robots.com)**
+- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
+- **[Cyber-Duck](https://cyber-duck.co.uk)**
+- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
+- **[Jump24](https://jump24.co.uk)**
+- **[Redberry](https://redberry.international/laravel/)**
+- **[Active Logic](https://activelogic.com)**
+- **[byte5](https://byte5.de)**
+- **[OP.GG](https://op.gg)**
 
-# 5. Configurer la base de données dans .env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3307
-DB_DATABASE=laravel
-DB_USERNAME=root
-DB_PASSWORD=votre_mot_de_passe
+## Contributing
 
-# 6. Migrer la base de données
-php artisan migrate
+Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
-# 7. Générer la documentation Swagger
-php artisan l5-swagger:generate
+## Code of Conduct
 
-# 8. Démarrer le serveur
-php artisan serve
-```
+In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
----
+## Security Vulnerabilities
 
-## Documentation API
+If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
-Une fois le serveur démarré, la documentation Swagger est accessible sur :
+## License
 
-```
-http://localhost:8000/api/documentation
-```
-
----
-
-## Endpoints principaux
-
-### Authentification
-| Méthode | Route | Description |
-|---------|-------|-------------|
-| POST | `/api/register` | Inscription (mentor ou mentoré) |
-| POST | `/api/login` | Connexion — retourne un token |
-| POST | `/api/logout` | Déconnexion |
-| GET | `/api/me` | Profil de l'utilisateur connecté |
-
-### Mentors
-| Méthode | Route | Description |
-|---------|-------|-------------|
-| GET | `/api/mentors` | Liste des mentors validés |
-| GET | `/api/mentors/{id}` | Détail d'un mentor |
-| POST | `/api/mentor/profile` | Créer/mettre à jour son profil |
-
-### Sessions
-| Méthode | Route | Description |
-|---------|-------|-------------|
-| GET | `/api/sessions` | Mes sessions |
-| POST | `/api/sessions` | Réserver une session |
-| PUT | `/api/sessions/{id}/confirm` | Confirmer une session (mentor) |
-| PUT | `/api/sessions/{id}/cancel` | Annuler une session |
-| PUT | `/api/sessions/{id}/complete` | Marquer comme terminée (mentor) |
-
-### Disponibilités
-| Méthode | Route | Description |
-|---------|-------|-------------|
-| GET | `/api/mentors/{id}/availabilities` | Créneaux libres d'un mentor |
-| POST | `/api/availabilities` | Ajouter un créneau (mentor) |
-| DELETE | `/api/availabilities/{id}` | Supprimer un créneau (mentor) |
-
-### Évaluations
-| Méthode | Route | Description |
-|---------|-------|-------------|
-| POST | `/api/sessions/{id}/reviews` | Déposer une évaluation |
-| GET | `/api/mentors/{id}/reviews` | Évaluations d'un mentor |
-
-### Admin
-| Méthode | Route | Description |
-|---------|-------|-------------|
-| GET | `/api/admin/stats` | Statistiques globales |
-| GET | `/api/admin/pending-mentors` | Profils en attente de validation |
-| PUT | `/api/admin/mentors/{id}/validate` | Valider un profil mentor |
-
----
-
-## Authentification
-
-Toutes les routes protégées nécessitent un token Bearer dans le header :
-
-```
-Authorization: Bearer {token}
-```
-
-Le token est retourné lors du login ou de l'inscription.
-
----
-
-## Rôles utilisateurs
-
-| Rôle | Permissions |
-|------|-------------|
-| `mentee` | Rechercher des mentors, réserver des sessions, déposer des évaluations |
-| `mentor` | Gérer son profil, ses disponibilités, confirmer/terminer des sessions |
-| `admin` | Valider les profils mentors, accéder aux statistiques |
-
----
-
-## Structure du projet
-
-```
-app/
-├── Http/
-│   ├── Controllers/Api/    # AuthController, MentorController, SessionController...
-│   └── Requests/           # Form Requests (validation)
-├── Models/                 # User, MentorProfile, MentorSession, Review, Availability
-├── Policies/               # SessionPolicy, ReviewPolicy, MentorProfilePolicy
-└── Services/               # SessionService, AvailabilityService
-database/
-└── migrations/             # Schéma complet de la BDD
-routes/
-└── api.php                 # Toutes les routes API
-```
+The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
