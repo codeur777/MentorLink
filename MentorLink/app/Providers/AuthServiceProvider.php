@@ -2,25 +2,24 @@
 
 namespace App\Providers;
 
-// use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use App\Models\MentorSession;
+use App\Models\MentorProfile;
+use App\Models\Review;
+use App\Policies\SessionPolicy;
+use App\Policies\ReviewPolicy;
+use App\Policies\MentorProfilePolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
-    /**
-     * The model to policy mappings for the application.
-     *
-     * @var array<class-string, class-string>
-     */
     protected $policies = [
-        //
+        MentorSession::class => SessionPolicy::class,
+        MentorProfile::class => MentorProfilePolicy::class,
+        Review::class        => ReviewPolicy::class,
     ];
 
-    /**
-     * Register any authentication / authorization services.
-     */
     public function boot(): void
     {
-        //
+        $this->registerPolicies();
     }
 }
