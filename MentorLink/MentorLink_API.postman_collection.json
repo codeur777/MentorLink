@@ -1,0 +1,594 @@
+{
+  "info": {
+    "name": "MentorLink API",
+    "description": "Collection complète pour tester l'API MentorLink",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000/api" },
+    { "key": "token_mentee", "value": "" },
+    { "key": "token_mentor", "value": "" },
+    { "key": "token_admin", "value": "" },
+    { "key": "session_id", "value": "" },
+    { "key": "availability_id", "value": "" },
+    { "key": "mentor_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1 - Auth",
+      "item": [
+        {
+          "name": "Inscription Mentee",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.token) { pm.collectionVariables.set('token_mentee', json.token); }",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Jean Mentoré\",\n  \"email\": \"mentee@test.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"role\": \"mentee\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{base_url}}/register"
+          }
+        },
+        {
+          "name": "Inscription Mentor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.token) {",
+                  "  pm.collectionVariables.set('token_mentor', json.token);",
+                  "  pm.collectionVariables.set('mentor_id', json.user.id);",
+                  "}",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Marie Mentor\",\n  \"email\": \"mentor@test.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"role\": \"mentor\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{base_url}}/register"
+          }
+        },
+        {
+          "name": "Inscription Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.token) { pm.collectionVariables.set('token_admin', json.token); }",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Admin MentorLink\",\n  \"email\": \"admin@test.com\",\n  \"password\": \"password123\",\n  \"password_confirmation\": \"password123\",\n  \"role\": \"mentee\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{base_url}}/register"
+          }
+        },
+        {
+          "name": "Connexion Mentee",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.token) { pm.collectionVariables.set('token_mentee', json.token); }",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"mentee@test.com\",\n  \"password\": \"password123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{base_url}}/login"
+          }
+        },
+        {
+          "name": "Connexion Mentor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.token) {",
+                  "  pm.collectionVariables.set('token_mentor', json.token);",
+                  "  pm.collectionVariables.set('mentor_id', json.user.id);",
+                  "}",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"mentor@test.com\",\n  \"password\": \"password123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{base_url}}/login"
+          }
+        },
+        {
+          "name": "Profil utilisateur connecté",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_mentee}}" }
+            ],
+            "url": "{{base_url}}/me"
+          }
+        },
+        {
+          "name": "Mettre à jour profil (bio + avatar)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_mentor}}" }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "Marie Mentor Updated", "type": "text" },
+                { "key": "bio", "value": "Étudiante en L3 Informatique, spécialisée en algo.", "type": "text" },
+                { "key": "avatar", "type": "file", "src": "" }
+              ]
+            },
+            "url": "{{base_url}}/profile"
+          }
+        },
+        {
+          "name": "Déconnexion",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_mentee}}" }
+            ],
+            "url": "{{base_url}}/logout"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 - Profil Mentor",
+      "item": [
+        {
+          "name": "Créer profil mentor",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_mentor}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"domains\": [\"Algorithmique\", \"Bases de données\", \"Laravel\"],\n  \"hourly_rate\": 2500,\n  \"bio\": \"Étudiant en Master 2, passionné par le dev web.\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{base_url}}/mentor/profile"
+          }
+        },
+        {
+          "name": "Liste des mentors validés",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/mentors"
+          }
+        },
+        {
+          "name": "Filtrer mentors par domaine",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": {
+              "raw": "{{base_url}}/mentors?domain=Laravel",
+              "host": ["{{base_url}}"],
+              "path": ["mentors"],
+              "query": [{ "key": "domain", "value": "Laravel" }]
+            }
+          }
+        },
+        {
+          "name": "Détail d'un mentor",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/mentors/{{mentor_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3 - Disponibilités",
+      "item": [
+        {
+          "name": "Ajouter un créneau (Lundi 09h-11h)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.id) { pm.collectionVariables.set('availability_id', json.id); }",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_mentor}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"day_of_week\": 1,\n  \"start_time\": \"09:00\",\n  \"end_time\": \"11:00\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{base_url}}/availabilities"
+          }
+        },
+        {
+          "name": "Ajouter un créneau (Mercredi 14h-16h)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_mentor}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"day_of_week\": 3,\n  \"start_time\": \"14:00\",\n  \"end_time\": \"16:00\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{base_url}}/availabilities"
+          }
+        },
+        {
+          "name": "Modifier un créneau",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_mentor}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"start_time\": \"10:00\",\n  \"end_time\": \"12:00\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{base_url}}/availabilities/{{availability_id}}"
+          }
+        },
+        {
+          "name": "Créneaux libres d'un mentor (semaine courante)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_mentee}}" }
+            ],
+            "url": "{{base_url}}/mentors/{{mentor_id}}/availabilities"
+          }
+        },
+        {
+          "name": "Supprimer un créneau",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_mentor}}" }
+            ],
+            "url": "{{base_url}}/availabilities/{{availability_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4 - Sessions",
+      "item": [
+        {
+          "name": "Réserver une session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var json = pm.response.json();",
+                  "if (json.id) { pm.collectionVariables.set('session_id', json.id); }",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_mentee}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mentor_id\": {{mentor_id}},\n  \"scheduled_at\": \"2026-06-10 09:00:00\",\n  \"duration_min\": 60\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{base_url}}/sessions"
+          }
+        },
+        {
+          "name": "Mes sessions (mentee)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_mentee}}" }
+            ],
+            "url": "{{base_url}}/sessions"
+          }
+        },
+        {
+          "name": "Mes sessions (mentor)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_mentor}}" }
+            ],
+            "url": "{{base_url}}/sessions"
+          }
+        },
+        {
+          "name": "Confirmer une session",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_mentor}}" }
+            ],
+            "url": "{{base_url}}/sessions/{{session_id}}/confirm"
+          }
+        },
+        {
+          "name": "Refuser une session",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_mentor}}" }
+            ],
+            "url": "{{base_url}}/sessions/{{session_id}}/refuse"
+          }
+        },
+        {
+          "name": "Annuler une session",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_mentee}}" }
+            ],
+            "url": "{{base_url}}/sessions/{{session_id}}/cancel"
+          }
+        },
+        {
+          "name": "Marquer session comme terminée",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_mentor}}" }
+            ],
+            "url": "{{base_url}}/sessions/{{session_id}}/complete"
+          }
+        },
+        {
+          "name": "Conflit de créneau (doit retourner 409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_mentee}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"mentor_id\": {{mentor_id}},\n  \"scheduled_at\": \"2026-06-10 09:00:00\",\n  \"duration_min\": 60\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{base_url}}/sessions"
+          }
+        }
+      ]
+    },
+    {
+      "name": "5 - Évaluations",
+      "item": [
+        {
+          "name": "Déposer une évaluation",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_mentee}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Excellente session, très pédagogue !\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{base_url}}/sessions/{{session_id}}/reviews"
+          }
+        },
+        {
+          "name": "Évaluations d'un mentor",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/mentors/{{mentor_id}}/reviews"
+          }
+        },
+        {
+          "name": "Double évaluation (doit retourner 409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_mentee}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 3,\n  \"comment\": \"Tentative de double évaluation\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{base_url}}/sessions/{{session_id}}/reviews"
+          }
+        }
+      ]
+    },
+    {
+      "name": "6 - Signalements",
+      "item": [
+        {
+          "name": "Signaler un utilisateur",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_mentee}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reported_id\": {{mentor_id}},\n  \"reason\": \"Comportement inapproprié\",\n  \"description\": \"Le mentor n'a pas respecté les horaires convenus.\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{base_url}}/reports"
+          }
+        }
+      ]
+    },
+    {
+      "name": "7 - Admin",
+      "item": [
+        {
+          "name": "Valider profil mentor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ],
+            "url": "{{base_url}}/admin/mentors/{{mentor_id}}/validate"
+          }
+        },
+        {
+          "name": "Profils en attente de validation",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ],
+            "url": "{{base_url}}/admin/pending-mentors"
+          }
+        },
+        {
+          "name": "Statistiques globales",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ],
+            "url": "{{base_url}}/admin/stats"
+          }
+        },
+        {
+          "name": "Liste des signalements",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ],
+            "url": "{{base_url}}/admin/reports"
+          }
+        },
+        {
+          "name": "Filtrer signalements (en_attente)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/reports?status=en_attente",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "reports"],
+              "query": [{ "key": "status", "value": "en_attente" }]
+            }
+          }
+        },
+        {
+          "name": "Traiter un signalement",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token_admin}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"traite\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{base_url}}/admin/reports/1"
+          }
+        }
+      ]
+    }
+  ]
+}

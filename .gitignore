@@ -13,6 +13,11 @@
 secrets.json
 credentials.json
 
+/storage/*
+!/storage/app/public
+!/storage/framework
+!/storage/logs
+
 # --- Dépendances ---
 node_modules/
 vendor/

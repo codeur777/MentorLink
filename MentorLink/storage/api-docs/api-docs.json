@@ -1,0 +1,714 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "MentorLink API",
+        "description": "API RESTful MentorLink — Auth via Bearer token (Sanctum)",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://my-default-host.com",
+            "description": "Serveur local"
+        }
+    ],
+    "paths": {
+        "/api/admin/stats": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "[Admin] Statistiques globales",
+                "operationId": "bb126a135b7d8ece3e86bc758930c615",
+                "responses": {
+                    "200": {
+                        "description": "Statistiques"
+                    },
+                    "403": {
+                        "description": "Réservé à l'admin"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/pending-mentors": {
+            "get": {
+                "tags": [
+                    "Admin"
+                ],
+                "summary": "[Admin] Profils en attente de validation",
+                "operationId": "ffc9ead671bde3c7cb5aaf7fd3d937f5",
+                "responses": {
+                    "200": {
+                        "description": "Profils en attente"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/register": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Inscription",
+                "operationId": "8e4e3cb7b46126f4696379d3c7eeb4ad",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "enum": [
+                                            "mentor",
+                                            "mentee"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Utilisateur créé"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Connexion",
+                "operationId": "222b2625838e3c57e017987f73598fda",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Token retourné"
+                    },
+                    "401": {
+                        "description": "Identifiants invalides"
+                    }
+                }
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Déconnexion",
+                "operationId": "ad65cbbd4e9f201619eae184a5961a98",
+                "responses": {
+                    "200": {
+                        "description": "Déconnecté"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/me": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Utilisateur connecté",
+                "operationId": "8367feff40ba10e43187792cad3132c1",
+                "responses": {
+                    "200": {
+                        "description": "Profil utilisateur"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/mentors/{mentorId}/availabilities": {
+            "get": {
+                "tags": [
+                    "Disponibilités"
+                ],
+                "summary": "Créneaux libres d'un mentor",
+                "operationId": "e8407212ad5ffa5b6d22b9908f76616f",
+                "parameters": [
+                    {
+                        "name": "mentorId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "week_start",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "2025-06-02"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Créneaux disponibles"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/availabilities": {
+            "post": {
+                "tags": [
+                    "Disponibilités"
+                ],
+                "summary": "Ajouter un créneau",
+                "operationId": "e0cc9c08c1b14aefe8af857cab466900",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "day_of_week",
+                                    "start_time",
+                                    "end_time"
+                                ],
+                                "properties": {
+                                    "day_of_week": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "start_time": {
+                                        "type": "string",
+                                        "example": "09:00"
+                                    },
+                                    "end_time": {
+                                        "type": "string",
+                                        "example": "11:00"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Créneau créé"
+                    },
+                    "403": {
+                        "description": "Réservé aux mentors"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/availabilities/{id}": {
+            "delete": {
+                "tags": [
+                    "Disponibilités"
+                ],
+                "summary": "Supprimer un créneau",
+                "operationId": "e7a3b7770e5a99414b4e070d22617893",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Supprimé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/mentors": {
+            "get": {
+                "tags": [
+                    "Mentors"
+                ],
+                "summary": "Liste des mentors validés",
+                "operationId": "e20cd905f0437e91f6850b57aa49cb2a",
+                "parameters": [
+                    {
+                        "name": "domain",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste paginée"
+                    }
+                }
+            }
+        },
+        "/api/mentors/{id}": {
+            "get": {
+                "tags": [
+                    "Mentors"
+                ],
+                "summary": "Détail d'un mentor",
+                "operationId": "f19ef0f5df60e1702a927f115e7db6be",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Profil mentor"
+                    },
+                    "404": {
+                        "description": "Introuvable"
+                    }
+                }
+            }
+        },
+        "/api/mentor/profile": {
+            "post": {
+                "tags": [
+                    "Mentors"
+                ],
+                "summary": "Créer/mettre à jour son profil mentor",
+                "operationId": "f770ed157aaa9e16e1381604e33a74b7",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "domains"
+                                ],
+                                "properties": {
+                                    "domains": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "hourly_rate": {
+                                        "type": "number"
+                                    },
+                                    "bio": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profil mis à jour"
+                    },
+                    "403": {
+                        "description": "Non autorisé"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/admin/mentors/{id}/validate": {
+            "put": {
+                "tags": [
+                    "Mentors",
+                    "Admin"
+                ],
+                "summary": "[Admin] Valider un profil mentor",
+                "operationId": "314bfeff288741194fda49ff54cd9f2e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Profil validé"
+                    },
+                    "403": {
+                        "description": "Réservé à l'admin"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/sessions/{sessionId}/reviews": {
+            "post": {
+                "tags": [
+                    "Évaluations"
+                ],
+                "summary": "Déposer une évaluation",
+                "operationId": "fbd4bdaadfaaebcc82db2b0026571218",
+                "parameters": [
+                    {
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "rating"
+                                ],
+                                "properties": {
+                                    "rating": {
+                                        "type": "integer",
+                                        "maximum": 5,
+                                        "minimum": 1
+                                    },
+                                    "comment": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Évaluation enregistrée"
+                    },
+                    "403": {
+                        "description": "Non autorisé"
+                    },
+                    "409": {
+                        "description": "Évaluation déjà déposée"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/mentors/{mentorId}/reviews": {
+            "get": {
+                "tags": [
+                    "Évaluations"
+                ],
+                "summary": "Évaluations d'un mentor",
+                "operationId": "b3aae669bab4c16bfcad29bedfe48a3c",
+                "parameters": [
+                    {
+                        "name": "mentorId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des reviews"
+                    }
+                }
+            }
+        },
+        "/api/sessions": {
+            "get": {
+                "tags": [
+                    "Sessions"
+                ],
+                "summary": "Mes sessions",
+                "operationId": "8db417cfbdb154beb6fcc56d6649967f",
+                "responses": {
+                    "200": {
+                        "description": "Liste des sessions"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Sessions"
+                ],
+                "summary": "Réserver une session",
+                "operationId": "81568e4aeb70c2aa8da61320dfe3cfd4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "mentor_id",
+                                    "scheduled_at",
+                                    "duration_min"
+                                ],
+                                "properties": {
+                                    "mentor_id": {
+                                        "type": "integer"
+                                    },
+                                    "scheduled_at": {
+                                        "type": "string",
+                                        "example": "2025-06-10 14:00:00"
+                                    },
+                                    "duration_min": {
+                                        "type": "integer",
+                                        "example": 60
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Session créée"
+                    },
+                    "409": {
+                        "description": "Conflit de créneau"
+                    },
+                    "403": {
+                        "description": "Réservé aux mentorés"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/sessions/{id}/confirm": {
+            "put": {
+                "tags": [
+                    "Sessions"
+                ],
+                "summary": "[Mentor] Confirmer une session",
+                "operationId": "01b5ef3217573b48b3b0e0eab9acc5ca",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Session confirmée"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/sessions/{id}/cancel": {
+            "put": {
+                "tags": [
+                    "Sessions"
+                ],
+                "summary": "Annuler une session",
+                "operationId": "860acc696ce2763631eb9e96b75bcc51",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Session annulée"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/sessions/{id}/complete": {
+            "put": {
+                "tags": [
+                    "Sessions"
+                ],
+                "summary": "[Mentor] Terminer une session",
+                "operationId": "f297d2451accb1bd43430a13813f7b2b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Session terminée"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "Token",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Admin",
+            "description": "Admin"
+        },
+        {
+            "name": "Auth",
+            "description": "Auth"
+        },
+        {
+            "name": "Disponibilités",
+            "description": "Disponibilités"
+        },
+        {
+            "name": "Mentors",
+            "description": "Mentors"
+        },
+        {
+            "name": "Évaluations",
+            "description": "Évaluations"
+        },
+        {
+            "name": "Sessions",
+            "description": "Sessions"
+        }
+    ]
+}
