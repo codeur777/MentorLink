@@ -1,47 +1,41 @@
 # MentorLink API
 
-Plateforme de mentorat académique — backend RESTful Laravel.
-Développé dans le cadre du cours Outils de Programmation Web — IAI-Togo GLSI-3.
+Plateforme de mentorat académique entre étudiants — backend RESTful.
+Cours Outils de Programmation Web — IAI-Togo GLSI-3.
 
 ---
 
 ## Stack technique
 
-- PHP 8.5 / Laravel 10
-- MySQL 9.1
-- Laravel Sanctum (authentification par token)
-- Laravel Breeze (scaffold auth)
-- L5-Swagger (documentation OpenAPI)
+| Composant | Version |
+|-----------|---------|
+| PHP | 8.5 |
+| Laravel | 12 |
+| Laravel Breeze | 2.x (stack API) |
+| Laravel Sanctum | 4.x |
+| L5-Swagger | 8.x |
+| MySQL | 9.1 (port 3307) |
 
 ---
 
 ## Installation
-
-### Prérequis
-
-- PHP >= 8.1 avec extensions : `pdo_mysql`, `zip`, `mbstring`, `openssl`
-- Composer
-- MySQL
-- Node.js + npm
-
-### Étapes
 
 ```bash
 # 1. Cloner le projet
 git clone https://github.com/[votre-repo]/mentorlink.git
 cd mentorlink
 
-# 2. Installer les dépendances PHP
+# 2. Dépendances PHP
 composer install
 
-# 3. Installer les dépendances JS
+# 3. Dépendances JS
 npm install && npm run build
 
-# 4. Configurer l'environnement
+# 4. Environnement
 cp .env.example .env
 php artisan key:generate
 
-# 5. Configurer la base de données dans .env
+# 5. Base de données (.env)
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3307
@@ -49,21 +43,22 @@ DB_DATABASE=laravel
 DB_USERNAME=root
 DB_PASSWORD=votre_mot_de_passe
 
-# 6. Migrer la base de données
+# 6. Migrations
 php artisan migrate
 
-# 7. Générer la documentation Swagger
+# 7. Lien storage (avatars)
+php artisan storage:link
+
+# 8. Documentation Swagger
 php artisan l5-swagger:generate
 
-# 8. Démarrer le serveur
+# 9. Démarrer
 php artisan serve
 ```
 
 ---
 
-## Documentation API
-
-Une fois le serveur démarré, la documentation Swagger est accessible sur :
+## Documentation API (Swagger)
 
 ```
 http://localhost:8000/api/documentation
@@ -71,88 +66,110 @@ http://localhost:8000/api/documentation
 
 ---
 
-## Endpoints principaux
-
-### Authentification
-| Méthode | Route | Description |
-|---------|-------|-------------|
-| POST | `/api/register` | Inscription (mentor ou mentoré) |
-| POST | `/api/login` | Connexion — retourne un token |
-| POST | `/api/logout` | Déconnexion |
-| GET | `/api/me` | Profil de l'utilisateur connecté |
-
-### Mentors
-| Méthode | Route | Description |
-|---------|-------|-------------|
-| GET | `/api/mentors` | Liste des mentors validés |
-| GET | `/api/mentors/{id}` | Détail d'un mentor |
-| POST | `/api/mentor/profile` | Créer/mettre à jour son profil |
-
-### Sessions
-| Méthode | Route | Description |
-|---------|-------|-------------|
-| GET | `/api/sessions` | Mes sessions |
-| POST | `/api/sessions` | Réserver une session |
-| PUT | `/api/sessions/{id}/confirm` | Confirmer une session (mentor) |
-| PUT | `/api/sessions/{id}/cancel` | Annuler une session |
-| PUT | `/api/sessions/{id}/complete` | Marquer comme terminée (mentor) |
-
-### Disponibilités
-| Méthode | Route | Description |
-|---------|-------|-------------|
-| GET | `/api/mentors/{id}/availabilities` | Créneaux libres d'un mentor |
-| POST | `/api/availabilities` | Ajouter un créneau (mentor) |
-| DELETE | `/api/availabilities/{id}` | Supprimer un créneau (mentor) |
-
-### Évaluations
-| Méthode | Route | Description |
-|---------|-------|-------------|
-| POST | `/api/sessions/{id}/reviews` | Déposer une évaluation |
-| GET | `/api/mentors/{id}/reviews` | Évaluations d'un mentor |
-
-### Admin
-| Méthode | Route | Description |
-|---------|-------|-------------|
-| GET | `/api/admin/stats` | Statistiques globales |
-| GET | `/api/admin/pending-mentors` | Profils en attente de validation |
-| PUT | `/api/admin/mentors/{id}/validate` | Valider un profil mentor |
-
----
-
 ## Authentification
 
-Toutes les routes protégées nécessitent un token Bearer dans le header :
+Toutes les routes protégées nécessitent un token Bearer :
 
 ```
 Authorization: Bearer {token}
 ```
 
-Le token est retourné lors du login ou de l'inscription.
+Le token est retourné à l'inscription (`/api/register`) et à la connexion (`/api/login`).
 
 ---
 
-## Rôles utilisateurs
+## Endpoints
+
+### Auth (Breeze + Sanctum)
+| Méthode | Route | Auth | Description |
+|---------|-------|------|-------------|
+| POST | `/api/register` | Non | Inscription (mentor ou mentee) |
+| POST | `/api/login` | Non | Connexion — retourne un token |
+| POST | `/api/logout` | Oui | Révocation du token |
+| GET | `/api/me` | Oui | Profil connecté |
+| POST | `/api/profile` | Oui | Mettre à jour profil + avatar |
+
+### Mentors
+| Méthode | Route | Auth | Description |
+|---------|-------|------|-------------|
+| GET | `/api/mentors` | Non | Liste des mentors validés (filtre `?domain=`) |
+| GET | `/api/mentors/{id}` | Non | Détail d'un mentor |
+| POST | `/api/mentor/profile` | Oui (mentor) | Créer/mettre à jour son profil |
+
+### Disponibilités
+| Méthode | Route | Auth | Description |
+|---------|-------|------|-------------|
+| GET | `/api/mentors/{id}/availabilities` | Oui | Créneaux libres d'un mentor |
+| POST | `/api/availabilities` | Oui (mentor) | Ajouter un créneau |
+| PUT | `/api/availabilities/{id}` | Oui (mentor) | Modifier un créneau |
+| DELETE | `/api/availabilities/{id}` | Oui (mentor) | Supprimer un créneau |
+
+### Sessions
+| Méthode | Route | Auth | Description |
+|---------|-------|------|-------------|
+| GET | `/api/sessions` | Oui | Mes sessions |
+| POST | `/api/sessions` | Oui (mentee) | Réserver une session |
+| PUT | `/api/sessions/{id}/confirm` | Oui (mentor) | Confirmer |
+| PUT | `/api/sessions/{id}/refuse` | Oui (mentor) | Refuser |
+| PUT | `/api/sessions/{id}/cancel` | Oui | Annuler |
+| PUT | `/api/sessions/{id}/complete` | Oui (mentor) | Marquer comme terminée |
+
+### Évaluations
+| Méthode | Route | Auth | Description |
+|---------|-------|------|-------------|
+| POST | `/api/sessions/{id}/reviews` | Oui (mentee) | Déposer une évaluation |
+| GET | `/api/mentors/{id}/reviews` | Non | Évaluations d'un mentor |
+
+### Signalements
+| Méthode | Route | Auth | Description |
+|---------|-------|------|-------------|
+| POST | `/api/reports` | Oui | Signaler un utilisateur |
+
+### Admin
+| Méthode | Route | Auth | Description |
+|---------|-------|------|-------------|
+| GET | `/api/admin/stats` | Admin | Statistiques globales |
+| GET | `/api/admin/pending-mentors` | Admin | Profils en attente |
+| PUT | `/api/admin/mentors/{id}/validate` | Admin | Valider un profil |
+| GET | `/api/admin/reports` | Admin | Liste des signalements |
+| PUT | `/api/admin/reports/{id}` | Admin | Traiter un signalement |
+
+---
+
+## Rôles
 
 | Rôle | Permissions |
 |------|-------------|
-| `mentee` | Rechercher des mentors, réserver des sessions, déposer des évaluations |
-| `mentor` | Gérer son profil, ses disponibilités, confirmer/terminer des sessions |
-| `admin` | Valider les profils mentors, accéder aux statistiques |
+| `mentee` | Parcourir mentors, réserver sessions, évaluer, signaler |
+| `mentor` | Gérer profil, disponibilités, confirmer/refuser/terminer sessions |
+| `admin` | Valider profils, gérer signalements, voir statistiques |
+
+> Pour créer un admin : `UPDATE users SET role='admin' WHERE email='...'`
 
 ---
 
-## Structure du projet
+## Tests Postman
+
+Importer `MentorLink/MentorLink_API.postman_collection.json` dans Postman puis utiliser le **Collection Runner** pour exécuter les 31 requêtes dans l'ordre automatiquement.
+
+---
+
+## Structure
 
 ```
-app/
-├── Http/
-│   ├── Controllers/Api/    # AuthController, MentorController, SessionController...
-│   └── Requests/           # Form Requests (validation)
-├── Models/                 # User, MentorProfile, MentorSession, Review, Availability
-├── Policies/               # SessionPolicy, ReviewPolicy, MentorProfilePolicy
-└── Services/               # SessionService, AvailabilityService
-database/
-└── migrations/             # Schéma complet de la BDD
-routes/
-└── api.php                 # Toutes les routes API
+MentorLink/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── Api/        # MentorController, SessionController, ReviewController...
+│   │   │   └── Auth/       # Breeze — RegisteredUserController, AuthenticatedSessionController
+│   │   └── Requests/       # Form Requests (validation)
+│   ├── Models/             # User, MentorProfile, MentorSession, Review, Availability, Report
+│   ├── Policies/           # SessionPolicy, ReviewPolicy, MentorProfilePolicy
+│   └── Services/           # SessionService, AvailabilityService
+├── database/
+│   └── migrations/         # 9 tables
+└── routes/
+    ├── api.php             # Routes API
+    └── auth.php            # Routes Breeze
 ```
