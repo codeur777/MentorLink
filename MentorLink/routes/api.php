@@ -9,19 +9,26 @@ use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\SessionController;
 use Illuminate\Support\Facades\Route;
 
-// --- Routes publiques ---
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login',    [AuthController::class, 'login']);
+// -----------------------------------------------------------------------
+// Routes d'authentification — gérées par Laravel Breeze (stack API)
+// Les contrôleurs sont dans App\Http\Controllers\Auth\
+// -----------------------------------------------------------------------
+require __DIR__ . '/auth.php';
 
-Route::get('/mentors',                          [MentorController::class, 'index']);
-Route::get('/mentors/{id}',                     [MentorController::class, 'show']);
-Route::get('/mentors/{mentorId}/reviews',       [ReviewController::class, 'indexForMentor']);
+// -----------------------------------------------------------------------
+// Routes publiques
+// -----------------------------------------------------------------------
+Route::get('/mentors',                        [MentorController::class, 'index']);
+Route::get('/mentors/{id}',                   [MentorController::class, 'show']);
+Route::get('/mentors/{mentorId}/reviews',     [ReviewController::class, 'indexForMentor']);
 
-// --- Routes authentifiées (Sanctum) ---
+// -----------------------------------------------------------------------
+// Routes authentifiées (Sanctum)
+// -----------------------------------------------------------------------
 Route::middleware('auth:sanctum')->group(function () {
 
-    Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/me',      [AuthController::class, 'me']);
+    // Profil utilisateur connecté
+    Route::get('/me',       [AuthController::class, 'me']);
     Route::post('/profile', [AuthController::class, 'updateProfile']);
 
     // Profil mentor
@@ -49,10 +56,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Admin
     Route::middleware('can:admin')->prefix('admin')->group(function () {
-        Route::get('/stats',                   [AdminController::class, 'stats']);
-        Route::get('/pending-mentors',         [AdminController::class, 'pendingMentors']);
-        Route::put('/mentors/{id}/validate',   [MentorController::class, 'validateProfile']);
-        Route::get('/reports',                 [ReportController::class, 'index']);
-        Route::put('/reports/{report}',        [ReportController::class, 'update']);
+        Route::get('/stats',                 [AdminController::class, 'stats']);
+        Route::get('/pending-mentors',       [AdminController::class, 'pendingMentors']);
+        Route::put('/mentors/{id}/validate', [MentorController::class, 'validateProfile']);
+        Route::get('/reports',               [ReportController::class, 'index']);
+        Route::put('/reports/{report}',      [ReportController::class, 'update']);
     });
 });

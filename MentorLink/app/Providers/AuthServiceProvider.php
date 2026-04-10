@@ -2,24 +2,31 @@
 
 namespace App\Providers;
 
+use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use App\Models\MentorSession;
-use App\Models\MentorProfile;
-use App\Models\Review;
-use App\Policies\SessionPolicy;
-use App\Policies\ReviewPolicy;
-use App\Policies\MentorProfilePolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
+    /**
+     * The policy mappings for the application.
+     *
+     * @var array<class-string, class-string>
+     */
     protected $policies = [
-        MentorSession::class => SessionPolicy::class,
-        MentorProfile::class => MentorProfilePolicy::class,
-        Review::class        => ReviewPolicy::class,
+        // 'App\Models\Model' => 'App\Policies\ModelPolicy',
     ];
 
+    /**
+     * Register any authentication / authorization services.
+     */
     public function boot(): void
     {
         $this->registerPolicies();
+
+        ResetPassword::createUrlUsing(function (object $notifiable, string $token) {
+            return config('app.frontend_url')."/password-reset/$token?email={$notifiable->getEmailForPasswordReset()}";
+        });
+
+        //
     }
 }
