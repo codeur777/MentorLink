@@ -50,3 +50,6 @@ Homestead.yaml
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+# --- Scripts de setup (ne pas versionner) ---
+mentorlink_backend_setup.sh
