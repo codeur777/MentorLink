@@ -1,30 +1,33 @@
-# MentorLink - Backend API
+# MentorLink - Dev Backend 1
 
-## 🎯 Partie Backend Principale
+## 🎯 Ma Partie (Dev Backend 1)
 
-Cette branche contient **uniquement** la partie backend/API développée selon les tâches assignées :
+Cette branche contient **uniquement** ma partie selon la répartition des tâches :
 
 ### ✅ Fonctionnalités Implémentées
 
 #### 🔐 **Auth** - Authentification complète
-- Register, login, logout, /me
-- Sanctum tokens
-- Middleware CheckRole (mentor/mentee/admin)
+- Register, login, logout, /me — Sanctum tokens
+- Middleware CheckRole : Contrôle d'accès par rôle (mentor/mentee/admin)
 
 #### 👨‍🏫 **Mentors** - Profils mentors
-- CRUD profil complet
-- Domaines JSON, tarif, validation admin
-- Disponibilités avec créneaux récurrents
-- AvailabilityService (filtrage)
+- CRUD profil, domaines JSON, tarif, validation admin
+- Disponibilités : Créneaux récurrents + AvailabilityService (filtrage)
 
 #### 🛡️ **Admin** - Dashboard admin
-- Stats globales
-- Profils en attente, validation
-- Gestion des rapports
+- Stats globales, profils en attente, validation
 
-#### 🗄️ **BDD** - Base de données
-- Migrations : users, mentor_profiles, availabilities, sessions, reviews, reports
+#### 🗄️ **BDD** - Migrations
+- users, mentor_profiles, availabilities
 - Schéma + factories + seeders mentors
+
+---
+
+## ❌ Non Inclus (Dev Backend 2)
+
+- **Sessions** : Réservation, cycle de vie, policies
+- **Reviews** : Évaluations post-session
+- **API Docs** : Documentation Swagger/OpenAPI
 
 ---
 
@@ -46,7 +49,7 @@ php artisan db:seed
 php artisan serve
 ```
 
-## 📋 API Endpoints
+## 📋 API Endpoints (Dev Backend 1 uniquement)
 
 ### Auth
 - `POST /api/register` - Inscription
@@ -65,7 +68,7 @@ php artisan serve
 - `GET /api/admin/pending-profiles` - Profils en attente
 - `PUT /api/admin/profiles/{id}/validate` - Valider profil
 
-## 📁 Structure Backend
+## 📁 Structure Backend (Dev Backend 1)
 
 ```
 app/
@@ -73,19 +76,18 @@ app/
 │   ├── AuthController.php
 │   ├── MentorController.php
 │   ├── AdminController.php
-│   ├── AvailabilityController.php
-│   └── ...
+│   └── AvailabilityController.php
 ├── Models/
 │   ├── User.php
 │   ├── MentorProfile.php
-│   ├── Availability.php
-│   └── ...
+│   └── Availability.php
 ├── Services/
-│   ├── AvailabilityService.php
-│   └── SessionService.php
+│   └── AvailabilityService.php
 └── Http/Requests/
+    ├── RegisterRequest.php
     ├── StoreMentorProfileRequest.php
-    └── ...
+    ├── StoreAvailabilityRequest.php
+    └── UpdateAvailabilityRequest.php
 ```
 
 ## 🔧 Tests
@@ -94,4 +96,4 @@ Collection Postman disponible : `MentorLink_API.postman_collection.json`
 
 ---
 
-**Note** : Cette branche ne contient que le backend. Le frontend sera développé par un autre développeur sur une branche séparée.
+**Note** : Cette branche contient uniquement la partie **Dev Backend 1**. Les sessions, reviews et documentation API seront développées par le **Dev Backend 2** sur une branche séparée.
