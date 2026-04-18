@@ -2,8 +2,13 @@
 
 namespace App\Providers;
 
+use App\Models\Availability;
+use App\Models\MentorProfile;
+use App\Policies\AvailabilityPolicy;
+use App\Policies\MentorProfilePolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -13,7 +18,8 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        // 'App\Models\Model' => 'App\Policies\ModelPolicy',
+        MentorProfile::class => MentorProfilePolicy::class,
+        Availability::class  => AvailabilityPolicy::class,
     ];
 
     /**
@@ -23,10 +29,14 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        ResetPassword::createUrlUsing(function (object $notifiable, string $token) {
-            return config('app.frontend_url')."/password-reset/$token?email={$notifiable->getEmailForPasswordReset()}";
+        // Gate for admin-only actions
+        Gate::define('admin', function ($user) {
+            return $user->isAdmin();
         });
 
-        //
+        ResetPassword::createUrlUsing(function (object $notifiable, string $token) {
+            return config('app.frontend_url', config('app.url'))
+                . "/password-reset/$token?email={$notifiable->getEmailForPasswordReset()}";
+        });
     }
 }
