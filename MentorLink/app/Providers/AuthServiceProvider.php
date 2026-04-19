@@ -4,10 +4,12 @@ namespace App\Providers;
 
 use App\Models\Availability;
 use App\Models\MentorProfile;
+use App\Models\Report;
 use App\Models\Review;
 use App\Models\Session;
 use App\Policies\AvailabilityPolicy;
 use App\Policies\MentorProfilePolicy;
+use App\Policies\ReportPolicy;
 use App\Policies\ReviewPolicy;
 use App\Policies\SessionPolicy;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -21,6 +23,7 @@ class AuthServiceProvider extends ServiceProvider
         Availability::class  => AvailabilityPolicy::class,
         Session::class       => SessionPolicy::class,
         Review::class        => ReviewPolicy::class,
+        Report::class        => ReportPolicy::class,
     ];
 
     public function boot(): void

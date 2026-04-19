@@ -43,7 +43,13 @@ class MentorController extends Controller
             ->with(['mentorProfile', 'availabilities'])
             ->firstOrFail();
 
-        return view('mentors.show', compact('mentor'));
+        // Reviews sorted newest first, via completed sessions
+        $reviews = \App\Models\Review::with('mentee')
+            ->where('mentor_id', $id)
+            ->latest()
+            ->get();
+
+        return view('mentors.show', compact('mentor', 'reviews'));
     }
 
     /**

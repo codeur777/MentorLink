@@ -6,12 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSessionRequest;
 use App\Models\Session;
 use App\Models\User;
+use App\Services\AvailabilityService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class SessionController extends Controller
 {
+    public function __construct(private AvailabilityService $availabilityService) {}
+
     /**
-     * List sessions for the authenticated user (mentor or mentee).
+     * List sessions for the authenticated user.
      */
     public function index()
     {
@@ -20,14 +24,12 @@ class SessionController extends Controller
         if ($user->isMentor()) {
             $sessions = Session::with(['mentee', 'review'])
                 ->where('mentor_id', $user->id)
-                ->orderByDesc('date')
-                ->orderByDesc('start_time')
+                ->orderByDesc('date')->orderByDesc('start_time')
                 ->paginate(15);
         } else {
             $sessions = Session::with(['mentor.mentorProfile', 'review'])
                 ->where('mentee_id', $user->id)
-                ->orderByDesc('date')
-                ->orderByDesc('start_time')
+                ->orderByDesc('date')->orderByDesc('start_time')
                 ->paginate(15);
         }
 
@@ -35,14 +37,14 @@ class SessionController extends Controller
     }
 
     /**
-     * Show the booking form for a specific mentor.
+     * Show the booking form — pass availability slots with booked status.
      */
     public function create(Request $request)
     {
         $user = auth()->user();
 
         if (! $user->isMentee()) {
-            return redirect()->route('dashboard')->with('error', 'Seuls les mentorés peuvent réserver une session.');
+            return redirect()->route('dashboard')->with('error', 'Seuls les mentores peuvent reserver une session.');
         }
 
         $mentor = User::where('role', 'mentor')
@@ -50,35 +52,38 @@ class SessionController extends Controller
             ->findOrFail($request->query('mentor_id'));
 
         if (! $mentor->mentorProfile?->is_validated) {
-            return redirect()->route('mentors.index')->with('error', 'Ce mentor n\'est pas encore validé.');
+            return redirect()->route('mentors.index')->with('error', 'Ce mentor n\'est pas encore valide.');
         }
 
-        return view('sessions.create', compact('mentor'));
+        // Show slots for the requested week (default: current week)
+        $weekStart = $request->filled('week')
+            ? Carbon::parse($request->week)
+            : Carbon::now();
+
+        $slots = $this->availabilityService->getSlotsForWeek($mentor->id, $weekStart);
+
+        // Week navigation
+        $prevWeek = $weekStart->copy()->startOfWeek(Carbon::MONDAY)->subWeek()->toDateString();
+        $nextWeek = $weekStart->copy()->startOfWeek(Carbon::MONDAY)->addWeek()->toDateString();
+
+        return view('sessions.create', compact('mentor', 'slots', 'weekStart', 'prevWeek', 'nextWeek'));
     }
 
     /**
-     * Store a new session booking.
+     * Store a new session — validate against availability before saving.
      */
     public function store(StoreSessionRequest $request)
     {
-        $mentor = User::findOrFail($request->mentor_id);
-
-        // Conflict check: mentor cannot have two confirmed/pending sessions that overlap
-        $conflict = Session::where('mentor_id', $request->mentor_id)
-            ->where('date', $request->date)
-            ->whereIn('status', ['pending', 'confirmed'])
-            ->where(function ($q) use ($request) {
-                $q->where(function ($q2) use ($request) {
-                    $q2->where('start_time', '<', $request->end_time)
-                       ->where('end_time', '>', $request->start_time);
-                });
-            })
-            ->exists();
-
-        if ($conflict) {
-            return back()
-                ->withInput()
-                ->withErrors(['date' => 'Ce créneau est déjà réservé pour ce mentor.']);
+        // Server-side availability + conflict check
+        if (! $this->availabilityService->isSlotValid(
+            $request->mentor_id,
+            $request->date,
+            $request->start_time,
+            $request->end_time
+        )) {
+            return back()->withInput()->withErrors([
+                'start_time' => 'Ce creneau ne correspond pas aux disponibilites du mentor ou est deja reserve.',
+            ]);
         }
 
         Session::create([
@@ -92,7 +97,7 @@ class SessionController extends Controller
         ]);
 
         return redirect()->route('sessions.index')
-            ->with('success', 'Session réservée avec succès. En attente de confirmation du mentor.');
+            ->with('success', 'Session reservee avec succes. En attente de confirmation du mentor.');
     }
 
     /**
@@ -101,10 +106,8 @@ class SessionController extends Controller
     public function confirm(Session $session)
     {
         $this->authorize('confirm', $session);
-
         $session->update(['status' => 'confirmed']);
-
-        return back()->with('success', 'Session confirmée.');
+        return back()->with('success', 'Session confirmee.');
     }
 
     /**
@@ -113,10 +116,8 @@ class SessionController extends Controller
     public function cancel(Session $session)
     {
         $this->authorize('cancel', $session);
-
         $session->update(['status' => 'cancelled']);
-
-        return back()->with('success', 'Session annulée.');
+        return back()->with('success', 'Session annulee.');
     }
 
     /**
@@ -125,9 +126,7 @@ class SessionController extends Controller
     public function complete(Session $session)
     {
         $this->authorize('complete', $session);
-
         $session->update(['status' => 'completed']);
-
-        return back()->with('success', 'Session marquée comme terminée.');
+        return back()->with('success', 'Session marquee comme terminee.');
     }
 }

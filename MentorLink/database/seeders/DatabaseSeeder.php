@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Availability;
 use App\Models\MentorProfile;
+use App\Models\Report;
 use App\Models\Review;
 use App\Models\Session;
 use App\Models\User;
@@ -21,6 +22,7 @@ class DatabaseSeeder extends Seeder
             'password'          => Hash::make('password'),
             'role'              => 'admin',
             'email_verified_at' => now(),
+            'suspended'         => false,
         ]);
 
         // Mentors
@@ -30,6 +32,7 @@ class DatabaseSeeder extends Seeder
             'password'          => Hash::make('password'),
             'role'              => 'mentor',
             'email_verified_at' => now(),
+            'suspended'         => false,
         ]);
 
         $mentor2 = User::create([
@@ -38,6 +41,7 @@ class DatabaseSeeder extends Seeder
             'password'          => Hash::make('password'),
             'role'              => 'mentor',
             'email_verified_at' => now(),
+            'suspended'         => false,
         ]);
 
         // Mentor profiles
@@ -55,17 +59,17 @@ class DatabaseSeeder extends Seeder
             'is_validated' => false,
         ]);
 
-        // Availabilities for mentor1
+        // Availabilities for mentor1 (Monday 09-12, Wednesday 14-17)
         Availability::create([
             'mentor_id'   => $mentor1->id,
-            'day_of_week' => 1, // Monday
+            'day_of_week' => 1,
             'start_time'  => '09:00',
             'end_time'    => '12:00',
         ]);
 
         Availability::create([
             'mentor_id'   => $mentor1->id,
-            'day_of_week' => 3, // Wednesday
+            'day_of_week' => 3,
             'start_time'  => '14:00',
             'end_time'    => '17:00',
         ]);
@@ -77,32 +81,44 @@ class DatabaseSeeder extends Seeder
             'password'          => Hash::make('password'),
             'role'              => 'mentee',
             'email_verified_at' => now(),
+            'suspended'         => false,
         ]);
 
-        // A completed session with a review
-        $session = Session::create([
+        // Completed session with review (last Monday)
+        $lastMonday = now()->startOfWeek(\Carbon\Carbon::MONDAY)->subWeek();
+        $completedSession = Session::create([
             'mentor_id'  => $mentor1->id,
             'mentee_id'  => $mentee->id,
-            'date'       => now()->subDays(7)->toDateString(),
+            'date'       => $lastMonday->toDateString(),
             'start_time' => '09:00',
             'end_time'   => '10:00',
             'status'     => 'completed',
-            'note'       => 'Introduction au développement web',
+            'note'       => 'Introduction au developpement web',
         ]);
 
         Review::create([
-            'session_id' => $session->id,
+            'session_id' => $completedSession->id,
             'mentee_id'  => $mentee->id,
             'mentor_id'  => $mentor1->id,
             'rating'     => 5,
-            'comment'    => 'Excellent mentor, très pédagogue !',
+            'comment'    => 'Excellent mentor, tres pedagogique !',
         ]);
 
-        // A pending session
+        // Sample open report
+        Report::create([
+            'reporter_id' => $mentee->id,
+            'reported_id' => $mentor1->id,
+            'session_id'  => $completedSession->id,
+            'reason'      => 'Le mentor ne s\'est pas presente a la session convenue.',
+            'status'      => 'open',
+        ]);
+
+        // Pending session (next Monday within availability)
+        $nextMonday = now()->startOfWeek(\Carbon\Carbon::MONDAY)->addWeek();
         Session::create([
             'mentor_id'  => $mentor1->id,
             'mentee_id'  => $mentee->id,
-            'date'       => now()->addDays(3)->toDateString(),
+            'date'       => $nextMonday->toDateString(),
             'start_time' => '09:00',
             'end_time'   => '10:00',
             'status'     => 'pending',

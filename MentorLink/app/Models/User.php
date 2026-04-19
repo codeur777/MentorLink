@@ -12,13 +12,14 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'email', 'password', 'role', 'bio', 'avatar'];
+    protected $fillable = ['name', 'email', 'password', 'role', 'bio', 'avatar', 'suspended'];
 
     protected $hidden = ['password', 'remember_token'];
 
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password'          => 'hashed',
+        'suspended'         => 'boolean',
     ];
 
     // ------------------------------------------------------------------ relationships
@@ -33,32 +34,29 @@ class User extends Authenticatable
         return $this->hasMany(Availability::class, 'mentor_id');
     }
 
-    /** Sessions where this user is the mentor */
     public function mentorSessions(): HasMany
     {
         return $this->hasMany(Session::class, 'mentor_id');
     }
 
-    /** Sessions where this user is the mentee */
     public function menteeSessions(): HasMany
     {
         return $this->hasMany(Session::class, 'mentee_id');
     }
 
+    public function reportsMade(): HasMany
+    {
+        return $this->hasMany(Report::class, 'reporter_id');
+    }
+
+    public function reportsReceived(): HasMany
+    {
+        return $this->hasMany(Report::class, 'reported_id');
+    }
+
     // ------------------------------------------------------------------ role helpers
 
-    public function isMentor(): bool
-    {
-        return $this->role === 'mentor';
-    }
-
-    public function isMentee(): bool
-    {
-        return $this->role === 'mentee';
-    }
-
-    public function isAdmin(): bool
-    {
-        return $this->role === 'admin';
-    }
+    public function isMentor(): bool  { return $this->role === 'mentor'; }
+    public function isMentee(): bool  { return $this->role === 'mentee'; }
+    public function isAdmin(): bool   { return $this->role === 'admin'; }
 }

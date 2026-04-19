@@ -94,6 +94,20 @@
                     </a>
                 @endif
 
+                {{-- Report button (completed sessions, no existing report from this user) --}}
+                @if($session->isCompleted())
+                    @php
+                        $alreadyReported = \App\Models\Report::where('reporter_id', $user->id)
+                            ->where('session_id', $session->id)->exists();
+                    @endphp
+                    @if(! $alreadyReported)
+                        <a href="{{ route('reports.create', $session) }}"
+                           style="margin-left:10px; color:orange;">
+                            Signaler
+                        </a>
+                    @endif
+                @endif
+
                 {{-- Show existing review --}}
                 @if($session->review)
                     <div style="margin-top: 10px; padding: 8px; background: #f0f0f0;">
