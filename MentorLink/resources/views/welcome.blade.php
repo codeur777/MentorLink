@@ -53,16 +53,37 @@
                 <div class="col-md-8">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <a href="{{ route('register') }}?role=mentee" class="btn btn-light btn-lg w-100">
-                                <i class="fas fa-user-graduate text-primary me-2"></i>
-                                Je cherche un mentor
-                            </a>
+                            @auth
+                                <a href="{{ route('mentors.index') }}" class="btn btn-light btn-lg w-100">
+                                    <i class="fas fa-user-graduate text-primary me-2"></i>
+                                    Je cherche un mentor
+                                </a>
+                            @else
+                                <a href="{{ route('login') }}?redirect=mentors&role=mentee" class="btn btn-light btn-lg w-100">
+                                    <i class="fas fa-user-graduate text-primary me-2"></i>
+                                    Je cherche un mentor
+                                </a>
+                            @endauth
                         </div>
                         <div class="col-md-6 mb-3">
-                            <a href="{{ route('register') }}?role=mentor" class="btn btn-outline-light btn-lg w-100">
-                                <i class="fas fa-chalkboard-teacher me-2"></i>
-                                Je veux devenir mentor
-                            </a>
+                            @auth
+                                @if(auth()->user()->role === 'mentor')
+                                    <a href="{{ route('mentor.profile') }}" class="btn btn-outline-light btn-lg w-100">
+                                        <i class="fas fa-chalkboard-teacher me-2"></i>
+                                        Mon profil mentor
+                                    </a>
+                                @else
+                                    <a href="{{ route('register') }}?role=mentor" class="btn btn-outline-light btn-lg w-100">
+                                        <i class="fas fa-chalkboard-teacher me-2"></i>
+                                        Je veux devenir mentor
+                                    </a>
+                                @endif
+                            @else
+                                <a href="{{ route('login') }}?redirect=mentor-profile&role=mentor" class="btn btn-outline-light btn-lg w-100">
+                                    <i class="fas fa-chalkboard-teacher me-2"></i>
+                                    Je veux devenir mentor
+                                </a>
+                            @endauth
                         </div>
                     </div>
                 </div>

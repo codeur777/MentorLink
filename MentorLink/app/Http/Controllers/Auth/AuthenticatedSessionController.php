@@ -4,41 +4,65 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
 {
     /**
-     * @OA\Post(path="/api/login", summary="Connexion (Breeze)", tags={"Auth"},
-     *   @OA\RequestBody(required=true, @OA\JsonContent(
-     *     required={"email","password"},
-     *     @OA\Property(property="email", type="string"),
-     *     @OA\Property(property="password", type="string")
-     *   )),
-     *   @OA\Response(response=200, description="Token Sanctum retourné"),
-     *   @OA\Response(response=422, description="Identifiants invalides")
-     * )
+     * Display the login view.
      */
-    public function store(LoginRequest $request): JsonResponse
+    public function create(): View
     {
-        $request->authenticate();
-
-        $token = $request->user()->createToken('api-token')->plainTextToken;
-
-        return response()->json(['user' => $request->user(), 'token' => $token]);
+        return view('auth.login');
     }
 
     /**
-     * @OA\Post(path="/api/logout", summary="Déconnexion (Breeze)", tags={"Auth"}, security={{"bearerAuth":{}}},
-     *   @OA\Response(response=200, description="Déconnecté")
-     * )
+     * Handle an incoming authentication request.
      */
-    public function destroy(Request $request): JsonResponse
+    public function store(LoginRequest $request): RedirectResponse
     {
-        $request->user()->currentAccessToken()->delete();
+        $request->authenticate();
 
-        return response()->json(['message' => 'Déconnecté.']);
+        $request->session()->regenerate();
+
+        // Gérer les redirections spéciales avec rôle
+        $redirect = $request->get('redirect');
+        $role = $request->get('role');
+        
+        if ($redirect && $role) {
+            // Vérifier si l'utilisateur a le bon rôle
+            $user = auth()->user();
+            
+            if ($redirect === 'mentors' && $role === 'mentee') {
+                return redirect()->route('mentors.index');
+            }
+            
+            if ($redirect === 'mentor-profile' && $role === 'mentor') {
+                if ($user->role === 'mentor') {
+                    return redirect()->route('mentor.profile');
+                } else {
+                    return redirect()->route('dashboard')->with('error', 'Vous devez être mentor pour accéder à cette page.');
+                }
+            }
+        }
+
+        return redirect()->intended(route('dashboard'));
+    }
+
+    /**
+     * Destroy an authenticated session.
+     */
+    public function destroy(Request $request): RedirectResponse
+    {
+        Auth::guard('web')->logout();
+
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();
+
+        return redirect('/');
     }
 }

@@ -15,17 +15,14 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         
+        // Redirection automatique pour les admins
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        }
+        
         $stats = [];
         
-        if ($user->role === 'admin') {
-            $stats = [
-                'total_users' => User::count(),
-                'total_mentors' => User::where('role', 'mentor')->count(),
-                'total_mentees' => User::where('role', 'mentee')->count(),
-                'pending_mentors' => MentorProfile::where('is_validated', false)->count(),
-                'validated_mentors' => MentorProfile::where('is_validated', true)->count(),
-            ];
-        } elseif ($user->role === 'mentor') {
+        if ($user->role === 'mentor') {
             $stats = [
                 'profile_status' => $user->mentorProfile?->is_validated ? 'Validé' : 'En attente',
                 'total_availabilities' => $user->availabilities()->count(),

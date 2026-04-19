@@ -5,28 +5,27 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
+use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
 {
     /**
-     * @OA\Post(path="/api/register", summary="Inscription (Breeze)", tags={"Auth"},
-     *   @OA\RequestBody(required=true, @OA\JsonContent(
-     *     required={"name","email","password","password_confirmation","role"},
-     *     @OA\Property(property="name", type="string"),
-     *     @OA\Property(property="email", type="string"),
-     *     @OA\Property(property="password", type="string"),
-     *     @OA\Property(property="password_confirmation", type="string"),
-     *     @OA\Property(property="role", type="string", enum={"mentor","mentee"})
-     *   )),
-     *   @OA\Response(response=201, description="Utilisateur créé avec token Sanctum")
-     * )
+     * Display the registration view.
      */
-    public function store(Request $request): JsonResponse
+    public function create(): View
+    {
+        return view('auth.register');
+    }
+
+    /**
+     * Handle an incoming registration request.
+     */
+    public function store(Request $request): RedirectResponse
     {
         $request->validate([
             'name'     => ['required', 'string', 'max:255'],
@@ -44,8 +43,8 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        $token = $user->createToken('api-token')->plainTextToken;
+        Auth::login($user);
 
-        return response()->json(['user' => $user, 'token' => $token], 201);
+        return redirect(route('dashboard'));
     }
 }
