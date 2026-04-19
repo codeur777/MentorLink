@@ -4,6 +4,7 @@ use App\Http\Controllers\Web\DashboardController;
 use App\Http\Controllers\Web\MentorController;
 use App\Http\Controllers\Web\AdminController;
 use App\Http\Controllers\Web\AvailabilityController;
+use App\Http\Controllers\NewsletterController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -33,10 +34,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/availabilities', [AvailabilityController::class, 'store'])->name('availabilities.store');
     Route::delete('/availabilities/{availability}', [AvailabilityController::class, 'destroy'])->name('availabilities.destroy');
     
+    // Newsletter
+    Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+    Route::get('/newsletter/unsubscribe', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
+    
     // Admin routes
     Route::prefix('admin')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
         Route::get('/stats', [AdminController::class, 'stats'])->name('admin.stats');
+        Route::get('/newsletters', [AdminController::class, 'newsletters'])->name('admin.newsletters');
         Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
         Route::get('/pending-mentors', [AdminController::class, 'pendingMentors'])->name('admin.pending-mentors');
         Route::put('/mentors/{id}/validate', [AdminController::class, 'validateProfile'])->name('admin.mentors.validate');

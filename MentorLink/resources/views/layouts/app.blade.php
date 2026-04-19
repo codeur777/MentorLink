@@ -75,6 +75,9 @@
                         <a class="nav-link {{ request()->routeIs('admin.pending-mentors') ? 'active' : '' }}" href="{{ route('admin.pending-mentors') }}">
                             <i class="fas fa-user-clock me-2"></i> Mentors en attente
                         </a>
+                        <a class="nav-link {{ request()->routeIs('admin.newsletters') ? 'active' : '' }}" href="{{ route('admin.newsletters') }}">
+                            <i class="fas fa-envelope me-2"></i> Newsletter
+                        </a>
                         <a class="nav-link {{ request()->routeIs('admin.users') ? 'active' : '' }}" href="{{ route('admin.users') }}">
                             <i class="fas fa-users me-2"></i> Utilisateurs
                         </a>

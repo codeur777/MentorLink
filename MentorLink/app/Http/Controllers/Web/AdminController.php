@@ -109,8 +109,37 @@ class AdminController extends Controller
     }
 
     /**
-     * Liste de tous les utilisateurs
+     * Liste des abonnés newsletter
      */
+    public function newsletters(Request $request)
+    {
+        if (auth()->user()->role !== 'admin') {
+            abort(403, 'Accès réservé aux administrateurs');
+        }
+
+        $query = \App\Models\Newsletter::query();
+
+        // Filtre par statut
+        if ($request->filled('status')) {
+            if ($request->status === 'active') {
+                $query->where('is_active', true);
+            } elseif ($request->status === 'inactive') {
+                $query->where('is_active', false);
+            }
+        }
+
+        // Recherche par email
+        if ($request->filled('search')) {
+            $query->where(function($q) use ($request) {
+                $q->where('email', 'like', '%' . $request->search . '%')
+                  ->orWhere('name', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $newsletters = $query->latest('subscribed_at')->paginate(20);
+
+        return view('admin.newsletters', compact('newsletters'));
+    }
     public function users(Request $request)
     {
         if (auth()->user()->role !== 'admin') {

@@ -499,10 +499,127 @@
     <!-- Footer -->
     <footer class="py-5 bg-dark text-white">
         <div class="container">
-            <div class="row">
+            <div class="row g-4">
+                <!-- À propos -->
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="fw-bold mb-3">
+                        <i class="fas fa-graduation-cap me-2"></i>MENTORLINK
+                    </h5>
+                    <p class="text-light mb-3">
+                        Nous connectons les jeunes talents avec des experts qui les guideront vers leurs objectifs professionnels.
+                    </p>
+                    <div class="contact-info">
+                        <div class="mb-2">
+                            <i class="fas fa-phone me-2 text-primary"></i>
+                            <span>+228 XX XX XX XX</span>
+                        </div>
+                        <div class="mb-2">
+                            <i class="fas fa-envelope me-2 text-primary"></i>
+                            <span>contact@mentorlink.tg</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Liens Rapides -->
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="fw-bold mb-3">Liens Rapides</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="{{ route('mentors.index') }}" class="text-light text-decoration-none">
+                                <i class="fas fa-chevron-right me-2 small"></i>Trouver un mentor
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#comment-ca-marche" class="text-light text-decoration-none">
+                                <i class="fas fa-chevron-right me-2 small"></i>Comment ça marche
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="#programmes" class="text-light text-decoration-none">
+                                <i class="fas fa-chevron-right me-2 small"></i>Nos programmes
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="{{ route('register') }}" class="text-light text-decoration-none">
+                                <i class="fas fa-chevron-right me-2 small"></i>Devenir mentor
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Newsletter -->
+                <div class="col-lg-6 col-md-12">
+                    <h6 class="fw-bold mb-3">Newsletter</h6>
+                    <p class="text-light mb-3">
+                        Recevez nos dernières actualités et conseils pour votre développement professionnel.
+                    </p>
+                    
+                    <!-- Formulaire Newsletter -->
+                    <form method="POST" action="{{ route('newsletter.subscribe') }}" class="newsletter-form">
+                        @csrf
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <input type="text" name="name" class="form-control bg-light border-0" 
+                                       placeholder="Votre nom (optionnel)" value="{{ old('name') }}">
+                            </div>
+                            <div class="col-md-5">
+                                <input type="email" name="email" class="form-control bg-light border-0" 
+                                       placeholder="Votre email" required value="{{ old('email') }}">
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    S'abonner
+                                </button>
+                            </div>
+                        </div>
+                        
+                        @if($errors->has('email'))
+                            <div class="text-warning small mt-2">
+                                <i class="fas fa-exclamation-triangle me-1"></i>{{ $errors->first('email') }}
+                            </div>
+                        @endif
+                        
+                        @if(session('newsletter_success'))
+                            <div class="text-success small mt-2">
+                                <i class="fas fa-check-circle me-1"></i>{{ session('newsletter_success') }}
+                            </div>
+                        @endif
+                    </form>
+                    
+                    <!-- Restez informé -->
+                    <div class="mt-4">
+                        <h6 class="fw-bold mb-2">Restez informé</h6>
+                        <p class="text-light small mb-3">
+                            Nous partageons des conseils d'orientation, des opportunités et des témoignages inspirants.
+                        </p>
+                        
+                        <!-- Réseaux sociaux -->
+                        <div class="social-links">
+                            <a href="#" class="text-light me-3" title="Facebook">
+                                <i class="fab fa-facebook-f fa-lg"></i>
+                            </a>
+                            <a href="#" class="text-light me-3" title="Twitter">
+                                <i class="fab fa-twitter fa-lg"></i>
+                            </a>
+                            <a href="#" class="text-light me-3" title="LinkedIn">
+                                <i class="fab fa-linkedin-in fa-lg"></i>
+                            </a>
+                            <a href="#" class="text-light me-3" title="Instagram">
+                                <i class="fab fa-instagram fa-lg"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <hr class="my-4 border-secondary">
+            
+            <!-- Copyright -->
+            <div class="row align-items-center">
                 <div class="col-md-6">
-                    <h5><i class="fas fa-graduation-cap me-2"></i>MentorLink</h5>
-                    <p class="text-muted">Plateforme de mentorat académique pour étudiants et jeunes professionnels</p>
+                    <p class="text-muted mb-0">
+                        © {{ date('Y') }} MentorLink. Tous droits réservés.
+                    </p>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <p class="text-muted mb-0">
@@ -512,6 +629,32 @@
             </div>
         </div>
     </footer>
+
+    <style>
+        .newsletter-form .form-control:focus {
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+            border-color: var(--primary-color);
+        }
+        
+        .social-links a {
+            transition: all 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            color: var(--primary-color) !important;
+            transform: translateY(-2px);
+        }
+        
+        .contact-info i {
+            width: 20px;
+        }
+        
+        footer ul li a:hover {
+            color: var(--primary-color) !important;
+            padding-left: 5px;
+            transition: all 0.3s ease;
+        }
+    </style>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
