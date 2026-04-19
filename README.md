@@ -1,6 +1,6 @@
-# MentorLink API
+# MentorLink
 
-Plateforme de mentorat académique entre étudiants — backend RESTful.
+Plateforme de mentorat académique entre étudiants — Application web Laravel avec Blade.
 Cours Outils de Programmation Web — IAI-Togo GLSI-3.
 
 ---
@@ -11,9 +11,8 @@ Cours Outils de Programmation Web — IAI-Togo GLSI-3.
 |-----------|---------|
 | PHP | 8.5 |
 | Laravel | 12 |
-| Laravel Breeze | 2.x (stack API) |
-| Laravel Sanctum | 4.x |
-| L5-Swagger | 8.x |
+| Laravel Breeze | 2.x (stack Blade) |
+| Bootstrap | 5.x |
 | MySQL | 9.1 (port 3307) |
 
 ---
@@ -23,7 +22,7 @@ Cours Outils de Programmation Web — IAI-Togo GLSI-3.
 ```bash
 # 1. Cloner le projet
 git clone https://github.com/[votre-repo]/mentorlink.git
-cd mentorlink
+cd mentorlink/MentorLink
 
 # 2. Dépendances PHP
 composer install
@@ -49,90 +48,44 @@ php artisan migrate
 # 7. Lien storage (avatars)
 php artisan storage:link
 
-# 8. Documentation Swagger
-php artisan l5-swagger:generate
-
-# 9. Démarrer
+# 8. Démarrer
 php artisan serve
 ```
 
----
-
-## Documentation API (Swagger)
-
-```
-http://localhost:8000/api/documentation
-```
+Accéder à l'application : `http://localhost:8000`
 
 ---
 
 ## Authentification
 
-Toutes les routes protégées nécessitent un token Bearer :
+L'application utilise Laravel Breeze avec authentification par session.
 
-```
-Authorization: Bearer {token}
-```
-
-Le token est retourné à l'inscription (`/api/register`) et à la connexion (`/api/login`).
+- **Inscription** : `/register`
+- **Connexion** : `/login`
+- **Dashboard** : `/dashboard` (après connexion)
 
 ---
 
-## Endpoints
+## Fonctionnalités
 
-### Auth (Breeze + Sanctum)
-| Méthode | Route | Auth | Description |
-|---------|-------|------|-------------|
-| POST | `/api/register` | Non | Inscription (mentor ou mentee) |
-| POST | `/api/login` | Non | Connexion — retourne un token |
-| POST | `/api/logout` | Oui | Révocation du token |
-| GET | `/api/me` | Oui | Profil connecté |
-| POST | `/api/profile` | Oui | Mettre à jour profil + avatar |
+### Pages Web
+| Route | Auth | Description |
+|-------|------|-------------|
+| `/` | Non | Page d'accueil |
+| `/register` | Non | Inscription (mentor ou mentee) |
+| `/login` | Non | Connexion |
+| `/dashboard` | Oui | Dashboard principal selon le rôle |
+| `/mentors` | Oui | Liste des mentors validés |
+| `/mentors/{id}` | Oui | Profil détaillé d'un mentor |
+| `/mentor/profile` | Oui (mentor) | Gérer son profil mentor |
+| `/availabilities/create` | Oui (mentor) | Ajouter des disponibilités |
 
-### Mentors
-| Méthode | Route | Auth | Description |
-|---------|-------|------|-------------|
-| GET | `/api/mentors` | Non | Liste des mentors validés (filtre `?domain=`) |
-| GET | `/api/mentors/{id}` | Non | Détail d'un mentor |
-| POST | `/api/mentor/profile` | Oui (mentor) | Créer/mettre à jour son profil |
-
-### Disponibilités
-| Méthode | Route | Auth | Description |
-|---------|-------|------|-------------|
-| GET | `/api/mentors/{id}/availabilities` | Oui | Créneaux libres d'un mentor |
-| POST | `/api/availabilities` | Oui (mentor) | Ajouter un créneau |
-| PUT | `/api/availabilities/{id}` | Oui (mentor) | Modifier un créneau |
-| DELETE | `/api/availabilities/{id}` | Oui (mentor) | Supprimer un créneau |
-
-### Sessions
-| Méthode | Route | Auth | Description |
-|---------|-------|------|-------------|
-| GET | `/api/sessions` | Oui | Mes sessions |
-| POST | `/api/sessions` | Oui (mentee) | Réserver une session |
-| PUT | `/api/sessions/{id}/confirm` | Oui (mentor) | Confirmer |
-| PUT | `/api/sessions/{id}/refuse` | Oui (mentor) | Refuser |
-| PUT | `/api/sessions/{id}/cancel` | Oui | Annuler |
-| PUT | `/api/sessions/{id}/complete` | Oui (mentor) | Marquer comme terminée |
-
-### Évaluations
-| Méthode | Route | Auth | Description |
-|---------|-------|------|-------------|
-| POST | `/api/sessions/{id}/reviews` | Oui (mentee) | Déposer une évaluation |
-| GET | `/api/mentors/{id}/reviews` | Non | Évaluations d'un mentor |
-
-### Signalements
-| Méthode | Route | Auth | Description |
-|---------|-------|------|-------------|
-| POST | `/api/reports` | Oui | Signaler un utilisateur |
-
-### Admin
-| Méthode | Route | Auth | Description |
-|---------|-------|------|-------------|
-| GET | `/api/admin/stats` | Admin | Statistiques globales |
-| GET | `/api/admin/pending-mentors` | Admin | Profils en attente |
-| PUT | `/api/admin/mentors/{id}/validate` | Admin | Valider un profil |
-| GET | `/api/admin/reports` | Admin | Liste des signalements |
-| PUT | `/api/admin/reports/{id}` | Admin | Traiter un signalement |
+### Administration
+| Route | Auth | Description |
+|-------|------|-------------|
+| `/admin/dashboard` | Admin | Dashboard administrateur |
+| `/admin/pending-mentors` | Admin | Profils mentors en attente |
+| `/admin/stats` | Admin | Statistiques globales |
 
 ---
 
@@ -148,9 +101,14 @@ Le token est retourné à l'inscription (`/api/register`) et à la connexion (`/
 
 ---
 
-## Tests Postman
+## Tests
 
-Importer `MentorLink/MentorLink_API.postman_collection.json` dans Postman puis utiliser le **Collection Runner** pour exécuter les 31 requêtes dans l'ordre automatiquement.
+Tester l'application directement dans le navigateur :
+
+1. Créer un compte mentee/mentor via `/register`
+2. Se connecter via `/login`
+3. Naviguer dans le dashboard selon le rôle
+4. Tester les fonctionnalités (profil mentor, disponibilités, etc.)
 
 ---
 
@@ -161,15 +119,17 @@ MentorLink/
 ├── app/
 │   ├── Http/
 │   │   ├── Controllers/
-│   │   │   ├── Api/        # MentorController, SessionController, ReviewController...
+│   │   │   ├── Web/        # DashboardController, MentorController, AdminController...
 │   │   │   └── Auth/       # Breeze — RegisteredUserController, AuthenticatedSessionController
 │   │   └── Requests/       # Form Requests (validation)
-│   ├── Models/             # User, MentorProfile, MentorSession, Review, Availability, Report
-│   ├── Policies/           # SessionPolicy, ReviewPolicy, MentorProfilePolicy
-│   └── Services/           # SessionService, AvailabilityService
+│   ├── Models/             # User, MentorProfile, Availability
+│   ├── Policies/           # MentorProfilePolicy
+│   └── Services/           # AvailabilityService
 ├── database/
-│   └── migrations/         # 9 tables
+│   └── migrations/         # Tables users, mentor_profiles, availabilities
+├── resources/
+│   └── views/              # Vues Blade (dashboard, mentors, admin)
 └── routes/
-    ├── api.php             # Routes API
+    ├── web.php             # Routes web principales
     └── auth.php            # Routes Breeze
 ```
