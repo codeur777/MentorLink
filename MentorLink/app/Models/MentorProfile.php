@@ -15,7 +15,7 @@ class MentorProfile extends Model
     protected $fillable = ['user_id', 'domains', 'hourly_rate', 'is_validated'];
 
     protected $casts = [
-        'domains' => 'array',
+        'domains'     => 'array',
         'is_validated' => 'boolean',
         'hourly_rate' => 'decimal:2',
     ];
@@ -23,5 +23,22 @@ class MentorProfile extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Average rating calculated from reviews of completed sessions for this mentor.
+     */
+    public function getAverageRatingAttribute(): ?float
+    {
+        $avg = Review::where('mentor_id', $this->user_id)->avg('rating');
+        return $avg ? round((float) $avg, 1) : null;
+    }
+
+    /**
+     * Total number of reviews for this mentor.
+     */
+    public function getReviewCountAttribute(): int
+    {
+        return Review::where('mentor_id', $this->user_id)->count();
     }
 }
