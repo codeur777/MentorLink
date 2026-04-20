@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -13,6 +15,17 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $fillable = ['name', 'email', 'password', 'role', 'bio', 'avatar', 'suspended'];
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'role',
+        'password',
+    ];
 
     protected $hidden = ['password', 'remember_token'];
 
@@ -59,4 +72,13 @@ class User extends Authenticatable
     public function isMentor(): bool  { return $this->role === 'mentor'; }
     public function isMentee(): bool  { return $this->role === 'mentee'; }
     public function isAdmin(): bool   { return $this->role === 'admin'; }
+    public function mentorMentorships(): HasMany
+    {
+        return $this->hasMany(Mentorship::class, 'mentor_id');
+    }
+
+    public function menteeMentorships(): HasMany
+    {
+        return $this->hasMany(Mentorship::class, 'mentee_id');
+    }
 }

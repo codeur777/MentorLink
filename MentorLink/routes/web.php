@@ -69,3 +69,21 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__ . '/auth.php';
+use App\Http\Controllers\FrontendController;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
+|
+*/
+
+Route::get('/', [FrontendController::class, 'landing'])->name('landing');
+Route::get('/mentors', [FrontendController::class, 'mentors'])->name('mentors.index');
+Route::get('/dashboard', [FrontendController::class, 'dashboard'])->name('dashboard.preview');
+Route::get('/access', [FrontendController::class, 'access'])->name('access.index');
