@@ -7,10 +7,11 @@ use App\Http\Controllers\Web\MentorController;
 use App\Http\Controllers\Web\ReportController;
 use App\Http\Controllers\Web\ReviewController;
 use App\Http\Controllers\Web\SessionController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    if (auth()->check()) {
+    if (Auth::check()) {
         return redirect()->route('dashboard');
     }
 
@@ -79,3 +80,20 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__ . '/auth.php';
+use App\Http\Controllers\FrontendController;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register web routes for your application. These
+| routes are loaded by the RouteServiceProvider and all of them will
+| be assigned to the "web" middleware group. Make something great!
+|
+*/
+
+Route::get('/', [FrontendController::class, 'landing'])->name('landing');
+Route::get('/mentors', [FrontendController::class, 'mentors'])->name('mentors.index');
+Route::get('/dashboard', [FrontendController::class, 'dashboard'])->name('dashboard.preview');
+Route::get('/access', [FrontendController::class, 'access'])->name('access.index');
