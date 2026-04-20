@@ -388,14 +388,6 @@
         }
     </script>
     
-    <script>
-        function confirmLogout() {
-            if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
-                document.getElementById('logout-form').submit();
-            }
-        }
-    </script>
-    
     @yield('scripts')
 </body>
 </html>

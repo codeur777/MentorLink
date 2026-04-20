@@ -2,6 +2,42 @@
 
 @section('title', 'Liste des mentors - MentorLink')
 
+@push('styles')
+<style>
+.mentor-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.mentor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.star-rating-display {
+    font-size: 1.1rem;
+}
+
+.domain-badges {
+    max-height: 60px;
+    overflow: hidden;
+    position: relative;
+}
+
+.domain-badges::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: linear-gradient(transparent, white);
+    pointer-events: none;
+}
+</style>
+@endpush
+
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
@@ -48,24 +84,21 @@
     <div class="row">
         @foreach($mentors as $mentor)
             <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100">
+                <div class="card h-100 mentor-card">
                     <div class="card-header bg-success text-white">
                         <div class="d-flex justify-content-between align-items-center">
                             <h6 class="mb-0">
                                 <i class="fas fa-chalkboard-teacher me-2"></i>{{ $mentor->name }}
                             </h6>
-                            <span class="badge bg-light text-dark">Validé</span>
+                            <span class="badge bg-light text-dark">
+                                <i class="fas fa-check me-1"></i>Validé
+                            </span>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <strong>Email :</strong><br>
-                            <small class="text-muted">{{ $mentor->email }}</small>
-                        </div>
-                        
+                    <div class="card-body d-flex flex-column">
                         <!-- Notation par étoiles -->
                         <div class="mb-3">
-                            <div class="d-flex align-items-center">
+                            <div class="d-flex align-items-center justify-content-center">
                                 <div class="star-rating-display me-2">
                                     @for($i = 1; $i <= 5; $i++)
                                         @if($i <= floor($mentor->average_rating))
@@ -79,7 +112,7 @@
                                 </div>
                                 <span class="fw-bold">{{ number_format($mentor->average_rating, 1) }}</span>
                                 <small class="text-muted ms-1">
-                                    ({{ $mentor->total_reviews }} {{ $mentor->total_reviews > 1 ? 'avis' : 'avis' }})
+                                    ({{ $mentor->total_reviews }} avis)
                                 </small>
                                 @if($mentor->penalties && $mentor->penalties->count() > 0)
                                     <small class="text-warning ms-2" title="Ce mentor a {{ $mentor->penalties->count() }} pénalité(s)">
@@ -88,38 +121,31 @@
                                 @endif
                             </div>
                             @if($mentor->total_reviews == 0)
-                                <small class="text-muted">Nouveau mentor - Pas encore d'avis</small>
+                                <div class="text-center">
+                                    <small class="text-muted">Nouveau mentor</small>
+                                </div>
                             @endif
                         </div>
                         
-                        @if($mentor->mentorProfile)
-                            <div class="mb-3">
-                                <strong>Domaines d'expertise :</strong><br>
-                                @if($mentor->mentorProfile->domains)
+                        @if($mentor->mentorProfile && $mentor->mentorProfile->domains)
+                            <div class="mb-4 flex-grow-1">
+                                <div class="text-center">
+                                    <strong class="text-muted small">Domaines d'expertise</strong>
+                                </div>
+                                <div class="domain-badges mt-2 text-center">
                                     @foreach($mentor->mentorProfile->domains as $domain)
                                         <span class="badge bg-primary me-1 mb-1">{{ ucfirst($domain) }}</span>
                                     @endforeach
-                                @else
-                                    <small class="text-muted">Non spécifié</small>
-                                @endif
-                            </div>
-                            
-                            <div class="mb-3">
-                                <strong>Tarif horaire :</strong><br>
-                                <span class="h5 text-success">{{ $mentor->mentorProfile->hourly_rate }}€/h</span>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <strong>Statut :</strong>
-                                <span class="badge bg-success">
-                                    <i class="fas fa-check me-1"></i>Profil validé
-                                </span>
+                                </div>
                             </div>
                         @endif
                         
-                        <div class="mb-3">
-                            <strong>Membre depuis :</strong><br>
-                            <small class="text-muted">{{ $mentor->created_at->format('d/m/Y') }}</small>
+                        <!-- Aperçu rapide -->
+                        <div class="text-center mt-auto">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Cliquez pour voir les détails complets
+                            </small>
                         </div>
                     </div>
                     <div class="card-footer bg-light">

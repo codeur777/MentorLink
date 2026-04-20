@@ -153,11 +153,14 @@
                                     $isLateCancellation = $minutesUntilSession <= 15;
                                 @endphp
                                 
-                                <form method="POST" action="{{ route('sessions.cancel', $session) }}" class="d-inline">
+                                <form method="POST" action="{{ route('sessions.cancel', $session) }}" class="d-inline" id="cancelForm">
                                     @csrf
                                     @method('PATCH')
-                                    <button type="submit" class="btn btn-outline-danger" 
-                                            onclick="return confirm('{{ $isLateCancellation && auth()->user()->role === 'mentor' ? 'ATTENTION: Annuler moins de 15 minutes avant la session entraînera une pénalité de 0.5 étoile. Êtes-vous sûr ?' : 'Êtes-vous sûr de vouloir annuler cette session ?' }}')">
+                                    <button type="button" class="btn btn-outline-danger" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#cancelModal"
+                                            data-session-id="{{ $session->id }}"
+                                            data-is-late="{{ $isLateCancellation && auth()->user()->role === 'mentor' ? 'true' : 'false' }}">
                                         <i class="fas fa-times me-2"></i>Annuler la session
                                         @if($isLateCancellation && auth()->user()->role === 'mentor')
                                             <i class="fas fa-exclamation-triangle ms-1 text-warning"></i>
@@ -177,13 +180,60 @@
                     <!-- Countdown pour les sessions confirmées -->
                     @if($session->status === 'confirmee' && $session->scheduled_at->isFuture())
                         <div class="mt-4">
-                            <div class="alert alert-success">
-                                <h6><i class="fas fa-clock me-2"></i>Temps restant avant la session :</h6>
-                                <div id="countdown" class="h4 mb-0"></div>
+                            <div class="alert alert-success border-0 shadow-sm">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div>
+                                        <h6 class="mb-2">
+                                            <i class="fas fa-clock me-2"></i>Temps restant avant la session
+                                        </h6>
+                                        <div id="countdown" class="h3 mb-0 fw-bold text-success"></div>
+                                        <small class="text-muted mt-1 d-block">
+                                            Session prévue le {{ $session->scheduled_at->format('d/m/Y à H:i') }}
+                                        </small>
+                                    </div>
+                                    <div class="text-end">
+                                        <i class="fas fa-hourglass-half fa-2x text-success opacity-50"></i>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     @endif
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation d'annulation -->
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cancelModalLabel">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                    Confirmer l'annulation
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="normalCancelMessage">
+                    <p class="mb-0">Êtes-vous sûr de vouloir annuler cette session ?</p>
+                </div>
+                <div id="lateCancelMessage" style="display: none;">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>ATTENTION :</strong> Annuler moins de 15 minutes avant la session entraînera une pénalité de 0.5 étoile.
+                    </div>
+                    <p class="mb-0">Êtes-vous sûr de vouloir continuer ?</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Annuler
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmCancelBtn">
+                    <i class="fas fa-check me-2"></i>Confirmer l'annulation
+                </button>
             </div>
         </div>
     </div>
@@ -196,6 +246,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const sessionDate = new Date('{{ $session->scheduled_at->toISOString() }}');
     const sessionDuration = {{ $session->duration_min }};
     const countdownElement = document.getElementById('countdown');
+    
+    if (!countdownElement) {
+        console.error('Élément countdown non trouvé');
+        return;
+    }
     
     function updateCountdown() {
         const now = new Date();
@@ -210,36 +265,69 @@ document.addEventListener('DOMContentLoaded', function() {
             const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
             
-            let countdownText = 'Début dans : ';
-            if (days > 0) countdownText += days + 'j ';
-            if (hours > 0) countdownText += hours + 'h ';
-            if (minutes > 0) countdownText += minutes + 'm ';
-            countdownText += seconds + 's';
+            let countdownText = '';
+            if (days > 0) {
+                countdownText += `${days}j `;
+            }
+            if (hours > 0 || days > 0) {
+                countdownText += `${hours.toString().padStart(2, '0')}h `;
+            }
+            countdownText += `${minutes.toString().padStart(2, '0')}m `;
+            countdownText += `${seconds.toString().padStart(2, '0')}s`;
             
             countdownElement.textContent = countdownText;
             
             // Changer la couleur selon la proximité
-            if (timeLeft <= 600000) { // 10 minutes
-                countdownElement.className = 'h4 mb-0 text-warning';
+            const alertBox = countdownElement.closest('.alert');
+            if (timeLeft <= 300000) { // 5 minutes
+                countdownElement.className = 'h3 mb-0 fw-bold text-danger';
+                alertBox.className = 'alert alert-danger border-0 shadow-sm';
+            } else if (timeLeft <= 600000) { // 10 minutes
+                countdownElement.className = 'h3 mb-0 fw-bold text-warning';
+                alertBox.className = 'alert alert-warning border-0 shadow-sm';
             } else if (timeLeft <= 3600000) { // 1 heure
-                countdownElement.className = 'h4 mb-0 text-info';
+                countdownElement.className = 'h3 mb-0 fw-bold text-info';
+                alertBox.className = 'alert alert-info border-0 shadow-sm';
+            } else {
+                countdownElement.className = 'h3 mb-0 fw-bold text-success';
+                alertBox.className = 'alert alert-success border-0 shadow-sm';
             }
+            
         } else if (timeUntilEnd > 0) {
             // Pendant la session
             const minutesLeft = Math.floor(timeUntilEnd / (1000 * 60));
             const secondsLeft = Math.floor((timeUntilEnd % (1000 * 60)) / 1000);
             
-            countdownElement.textContent = `Session en cours - Fin dans : ${minutesLeft}m ${secondsLeft}s`;
-            countdownElement.className = 'h4 mb-0 text-success';
+            countdownElement.textContent = `Session en cours - Fin dans ${minutesLeft}m ${secondsLeft.toString().padStart(2, '0')}s`;
+            countdownElement.className = 'h3 mb-0 fw-bold text-primary';
+            
+            const alertBox = countdownElement.closest('.alert');
+            alertBox.className = 'alert alert-primary border-0 shadow-sm';
+            
         } else {
             // Session terminée
             countdownElement.textContent = 'Session terminée';
-            countdownElement.className = 'h4 mb-0 text-muted';
+            countdownElement.className = 'h3 mb-0 fw-bold text-muted';
+            
+            const alertBox = countdownElement.closest('.alert');
+            alertBox.className = 'alert alert-secondary border-0 shadow-sm';
         }
     }
     
+    // Mise à jour immédiate
     updateCountdown();
-    setInterval(updateCountdown, 1000);
+    
+    // Mise à jour toutes les secondes
+    const intervalId = setInterval(updateCountdown, 1000);
+    
+    // Nettoyer l'intervalle quand on quitte la page
+    window.addEventListener('beforeunload', function() {
+        clearInterval(intervalId);
+    });
+    
+    // Debug: afficher l'heure de la session
+    console.log('Session prévue à:', sessionDate);
+    console.log('Heure actuelle:', new Date());
 });
 
 // Fonction pour copier le lien de réunion
@@ -270,6 +358,33 @@ function copyMeetLink(link) {
         alert('Erreur lors de la copie : ' + err);
     });
 }
+
+// Gestion du modal d'annulation
+document.addEventListener('DOMContentLoaded', function() {
+    const cancelModal = document.getElementById('cancelModal');
+    const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+    const normalMessage = document.getElementById('normalCancelMessage');
+    const lateMessage = document.getElementById('lateCancelMessage');
+    
+    if (cancelModal) {
+        cancelModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const isLate = button.getAttribute('data-is-late') === 'true';
+            
+            if (isLate) {
+                normalMessage.style.display = 'none';
+                lateMessage.style.display = 'block';
+            } else {
+                normalMessage.style.display = 'block';
+                lateMessage.style.display = 'none';
+            }
+        });
+        
+        confirmCancelBtn.addEventListener('click', function() {
+            document.getElementById('cancelForm').submit();
+        });
+    }
+});
 </script>
 @endpush
 @endif

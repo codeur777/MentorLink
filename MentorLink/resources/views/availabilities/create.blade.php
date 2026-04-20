@@ -88,11 +88,14 @@
                                     {{ \Carbon\Carbon::parse($availability->end_time)->format('H:i') }}
                                 </small>
                             </div>
-                            <form method="POST" action="{{ route('availabilities.destroy', $availability) }}" class="d-inline">
+                            <form method="POST" action="{{ route('availabilities.destroy', $availability) }}" class="d-inline delete-availability-form">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-outline-danger btn-sm" 
-                                        onclick="return confirm('Supprimer cette disponibilité ?')">
+                                <button type="button" class="btn btn-outline-danger btn-sm" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#deleteAvailabilityModal"
+                                        data-day="{{ $days[$availability->day_of_week] }}"
+                                        data-time="{{ \Carbon\Carbon::parse($availability->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($availability->end_time)->format('H:i') }}">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>
@@ -128,4 +131,61 @@
         </div>
     </div>
 </div>
+
+<!-- Modal de confirmation de suppression -->
+<div class="modal fade" id="deleteAvailabilityModal" tabindex="-1" aria-labelledby="deleteAvailabilityModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteAvailabilityModalLabel">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                    Confirmer la suppression
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">Êtes-vous sûr de vouloir supprimer cette disponibilité ?</p>
+                <div class="alert alert-light mt-2">
+                    <strong id="availabilityDetails"></strong>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>Annuler
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fas fa-trash me-2"></i>Supprimer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteModal = document.getElementById('deleteAvailabilityModal');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const availabilityDetails = document.getElementById('availabilityDetails');
+    let currentForm = null;
+    
+    if (deleteModal) {
+        deleteModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const day = button.getAttribute('data-day');
+            const time = button.getAttribute('data-time');
+            currentForm = button.closest('.delete-availability-form');
+            
+            availabilityDetails.textContent = `${day} : ${time}`;
+        });
+        
+        confirmDeleteBtn.addEventListener('click', function() {
+            if (currentForm) {
+                currentForm.submit();
+            }
+        });
+    }
+});
+</script>
+@endpush
