@@ -13,7 +13,17 @@ Route::get('/', function () {
     if (auth()->check()) {
         return redirect()->route('dashboard');
     }
-    return view('welcome');
+
+    // Top 3 mentors les mieux notés
+    $topMentors = \App\Models\User::where('role', 'mentor')
+        ->whereHas('mentorProfile', fn($q) => $q->where('is_validated', true))
+        ->with(['mentorProfile'])
+        ->get()
+        ->sortByDesc(fn($u) => optional($u->mentorProfile)->average_rating)
+        ->take(3)
+        ->values();
+
+    return view('welcome', compact('topMentors'));
 });
 
 Route::middleware('auth')->group(function () {

@@ -1,104 +1,128 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Mon profil mentor - MentorLink</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<body>
-    <h1>Mon profil mentor</h1>
-    
-    <nav>
-        <a href="{{ route('dashboard') }}">← Retour au dashboard</a>
-    </nav>
-    
-    @if(session('success'))
-        <div style="color: green; margin: 10px 0;">{{ session('success') }}</div>
-    @endif
-    
-    @if($errors->any())
-        <div style="color: red; margin: 10px 0;">
-            <ul>
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-    
-    <form method="POST" action="{{ route('mentor.profile.update') }}">
-        @csrf
-        
-        <div style="margin: 15px 0;">
-            <label><strong>Domaines d'expertise:</strong></label><br>
-            <input type="checkbox" name="domains[]" value="web" 
-                {{ in_array('web', old('domains', $user->mentorProfile->domains ?? [])) ? 'checked' : '' }}>
-            Développement Web<br>
-            
-            <input type="checkbox" name="domains[]" value="mobile" 
-                {{ in_array('mobile', old('domains', $user->mentorProfile->domains ?? [])) ? 'checked' : '' }}>
-            Développement Mobile<br>
-            
-            <input type="checkbox" name="domains[]" value="data" 
-                {{ in_array('data', old('domains', $user->mentorProfile->domains ?? [])) ? 'checked' : '' }}>
-            Data Science<br>
-            
-            <input type="checkbox" name="domains[]" value="devops" 
-                {{ in_array('devops', old('domains', $user->mentorProfile->domains ?? [])) ? 'checked' : '' }}>
-            DevOps<br>
-            
-            <input type="checkbox" name="domains[]" value="design" 
-                {{ in_array('design', old('domains', $user->mentorProfile->domains ?? [])) ? 'checked' : '' }}>
-            Design
-        </div>
-        
-        <div style="margin: 15px 0;">
-            <label><strong>Tarif horaire (€):</strong></label><br>
-            <input type="number" name="hourly_rate" step="0.01" min="0" 
-                value="{{ old('hourly_rate', $user->mentorProfile->hourly_rate ?? '') }}" required>
-        </div>
-        
-        <button type="submit">Mettre à jour le profil</button>
-    </form>
-    
-    @if($user->mentorProfile)
-        <div style="margin-top: 30px; padding: 15px; border: 1px solid #ccc;">
-            <h3>Statut actuel</h3>
-            <p><strong>Validation:</strong> 
-                <span style="color: {{ $user->mentorProfile->is_validated ? 'green' : 'orange' }}">
-                    {{ $user->mentorProfile->is_validated ? 'Profil validé' : 'En attente de validation admin' }}
-                </span>
-            </p>
-        </div>
-    @endif
-    
-    <div style="margin-top: 30px;">
-        <h3>Mes disponibilités</h3>
-        <a href="{{ route('availabilities.create') }}">Ajouter une disponibilité</a>
-        
-        @if($user->availabilities->count() > 0)
-            @php
-                $days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
-            @endphp
-            
-            @foreach($user->availabilities as $availability)
-                <div style="margin: 10px 0; padding: 10px; border: 1px solid #ddd;">
-                    <strong>{{ $days[$availability->day_of_week] }}:</strong> 
-                    {{ $availability->start_time }} - {{ $availability->end_time }}
-                    
-                    <form method="POST" action="{{ route('availabilities.destroy', $availability) }}" style="display: inline;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" onclick="return confirm('Supprimer cette disponibilité ?')" 
-                                style="color: red; background: none; border: none; cursor: pointer;">
-                            Supprimer
-                        </button>
-                    </form>
-                </div>
+@extends('layouts.app')
+@section('title', 'Mon profil mentor')
+
+@section('content')
+
+<div class="mb-6">
+    <a href="{{ route('dashboard') }}" class="text-vista text-sm hover:text-oxford transition">
+        <i class="fa-solid fa-arrow-left mr-1"></i> Dashboard
+    </a>
+</div>
+
+@if($errors->any())
+    <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+        <ul class="text-red-600 text-sm space-y-1">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
             @endforeach
-        @else
-            <p>Aucune disponibilité renseignée.</p>
-        @endif
+        </ul>
     </div>
-</body>
-</html>
+@endif
+
+<div class="grid grid-cols-3 gap-6">
+
+    {{-- Formulaire profil --}}
+    <div class="col-span-2">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <p class="text-xs text-gray-400 uppercase tracking-widest mb-6">Informations du profil</p>
+
+            <form method="POST" action="{{ route('mentor.profile.update') }}" class="flex flex-col gap-5">
+                @csrf
+
+                {{-- Domaines --}}
+                <div>
+                    <label class="text-xs font-semibold text-oxford mb-3 block">Domaines d'expertise</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        @foreach(['web' => 'Développement Web', 'mobile' => 'Développement Mobile', 'data' => 'Data Science', 'devops' => 'DevOps', 'design' => 'Design', 'python' => 'Python', 'javascript' => 'JavaScript', 'php' => 'PHP', 'machine-learning' => 'Machine Learning'] as $val => $label)
+                            <label class="flex items-center gap-2 cursor-pointer p-2 rounded-xl hover:bg-silver transition">
+                                <input type="checkbox" name="domains[]" value="{{ $val }}"
+                                       class="w-4 h-4 text-orange border-gray-300 rounded"
+                                       {{ in_array($val, old('domains', $user->mentorProfile->domains ?? [])) ? 'checked' : '' }}>
+                                <span class="text-sm text-oxford">{{ $label }}</span>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                {{-- Tarif --}}
+                <div>
+                    <label class="text-xs font-semibold text-oxford mb-1 block">Tarif horaire (FCFA)</label>
+                    <input type="number" name="hourly_rate" step="0.01" min="0"
+                           value="{{ old('hourly_rate', $user->mentorProfile->hourly_rate ?? '') }}"
+                           placeholder="0 = Gratuit"
+                           class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-oxford focus:outline-none focus:border-orange transition">
+                </div>
+
+                <button type="submit"
+                        class="bg-orange text-white font-semibold py-3 rounded-xl hover:opacity-90 transition text-sm">
+                    Mettre à jour le profil
+                </button>
+            </form>
+        </div>
+    </div>
+
+    {{-- Colonne droite --}}
+    <div class="flex flex-col gap-6">
+
+        {{-- Statut validation --}}
+        @if($user->mentorProfile)
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <p class="text-xs text-gray-400 uppercase tracking-widest mb-4">Statut</p>
+            @if($user->mentorProfile->is_validated)
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-green-50 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-circle-check text-green-500 text-sm"></i>
+                    </div>
+                    <span class="text-green-600 font-semibold text-sm">Profil validé</span>
+                </div>
+            @else
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-orange/10 rounded-xl flex items-center justify-center">
+                        <i class="fa-solid fa-clock text-orange text-sm"></i>
+                    </div>
+                    <span class="text-orange font-semibold text-sm">En attente de validation</span>
+                </div>
+            @endif
+        </div>
+        @endif
+
+        {{-- Disponibilités --}}
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <div class="flex items-center justify-between mb-4">
+                <p class="text-xs text-gray-400 uppercase tracking-widest">Disponibilités</p>
+                <a href="{{ route('availabilities.create') }}"
+                   class="bg-orange text-white text-xs font-semibold px-3 py-1.5 rounded-xl hover:opacity-90 transition">
+                    <i class="fa-solid fa-plus mr-1"></i>Ajouter
+                </a>
+            </div>
+
+            @php $days = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi']; @endphp
+
+            @if($user->availabilities->count() > 0)
+                <div class="flex flex-col gap-2">
+                    @foreach($user->availabilities as $availability)
+                        <div class="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
+                            <div>
+                                <p class="text-oxford text-sm font-medium">{{ $days[$availability->day_of_week] }}</p>
+                                <p class="text-gray-400 text-xs">{{ $availability->start_time }} – {{ $availability->end_time }}</p>
+                            </div>
+                            <form method="POST" action="{{ route('availabilities.destroy', $availability) }}">
+                                @csrf @method('DELETE')
+                                <button type="submit"
+                                        onclick="return confirm('Supprimer cette disponibilité ?')"
+                                        class="text-red-400 hover:text-red-600 text-xs transition">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <p class="text-gray-400 text-sm">Aucune disponibilité.</p>
+            @endif
+        </div>
+
+    </div>
+</div>
+
+@endsection
