@@ -13,6 +13,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        
         :root {
             --primary-color: #2563eb;
             --secondary-color: #1e40af;
@@ -22,12 +29,20 @@
             --bg-light: #f8fafc;
         }
         
+        .container, .container-fluid {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        
         * {
             font-family: 'Inter', sans-serif;
         }
         
         .hero-section {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            background: linear-gradient(rgba(37, 99, 235, 0.8), rgba(30, 64, 175, 0.8)), url('/images/hero-bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             color: white;
             padding: 120px 0 80px;
             position: relative;
@@ -41,13 +56,20 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-            opacity: 0.1;
+            background: rgba(37, 99, 235, 0.1);
+            opacity: 0.3;
         }
         
         .hero-content {
             position: relative;
             z-index: 2;
+            padding-left: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .hero-content {
+                padding-left: 1rem;
+            }
         }
         
         .hero-title {
@@ -197,8 +219,14 @@
         
         .navbar {
             padding: 1rem 0;
-            background: white !important;
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .navbar.scrolled {
+            background: rgba(255, 255, 255, 0.98) !important;
         }
         
         @media (max-width: 768px) {
@@ -335,7 +363,7 @@
                 <div class="col-md-4">
                     <div class="feature-card text-center">
                         <div class="feature-icon mx-auto">
-                            <i class="fas fa-target fa-2x text-white"></i>
+                            <i class="fas fa-user-check fa-2x text-white"></i>
                         </div>
                         <h4 class="fw-bold mb-3">Accompagnement personnalisé</h4>
                         <p class="text-muted">Un mentorat adapté à vos objectifs spécifiques et votre rythme d'apprentissage.</p>
@@ -501,17 +529,22 @@
         <div class="container">
             <div class="row g-4">
                 <!-- À propos -->
-                <div class="col-lg-4 col-md-6">
+                <div class="col-lg-4 col-md-6" id="apropos">
                     <h5 class="fw-bold mb-3">
                         <i class="fas fa-graduation-cap me-2"></i>MENTORLINK
                     </h5>
                     <p class="text-light mb-3">
                         Nous connectons les jeunes talents avec des experts qui les guideront vers leurs objectifs professionnels.
                     </p>
+                    <p class="text-light mb-3 small">
+                        MentorLink est une plateforme innovante dédiée au mentorat académique et professionnel. 
+                        Nous facilitons les rencontres entre étudiants ambitieux et mentors expérimentés pour 
+                        accélérer le développement des compétences et l'insertion professionnelle.
+                    </p>
                     <div class="contact-info">
                         <div class="mb-2">
                             <i class="fas fa-phone me-2 text-primary"></i>
-                            <span>+228 XX XX XX XX</span>
+                            <span>+228 91 31 76 87 </span>
                         </div>
                         <div class="mb-2">
                             <i class="fas fa-envelope me-2 text-primary"></i>
@@ -573,7 +606,7 @@
                             </div>
                         </div>
                         
-                        @if($errors->has('email'))
+                        @if(isset($errors) && $errors->has('email'))
                             <div class="text-warning small mt-2">
                                 <i class="fas fa-exclamation-triangle me-1"></i>{{ $errors->first('email') }}
                             </div>
@@ -617,12 +650,12 @@
             <!-- Copyright -->
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <p class="text-muted mb-0">
+                    <p class="text-light mb-0">
                         © {{ date('Y') }} MentorLink. Tous droits réservés.
                     </p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <p class="text-muted mb-0">
+                    <p class="text-light mb-0">
                         Cours Outils de Programmation Web — IAI-Togo GLSI-3
                     </p>
                 </div>
@@ -658,5 +691,31 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Effet de transparence de la navbar au scroll
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+        
+        // Smooth scroll pour les liens d'ancrage
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
 </body>
 </html>

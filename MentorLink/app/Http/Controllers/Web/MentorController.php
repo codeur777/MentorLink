@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreMentorProfileRequest;
 use App\Models\MentorProfile;
 use App\Models\User;
+use App\Models\Review;
 use Illuminate\Http\Request;
 
 class MentorController extends Controller
@@ -19,7 +20,7 @@ class MentorController extends Controller
             ->whereHas('mentorProfile', function($q) {
                 $q->where('is_validated', true);
             })
-            ->with('mentorProfile');
+            ->with(['mentorProfile', 'penalties']);
 
         // Filtre par domaine si spécifié
         if ($request->filled('domain')) {
@@ -40,10 +41,15 @@ class MentorController extends Controller
     {
         $mentor = User::where('role', 'mentor')
             ->where('id', $id)
-            ->with(['mentorProfile', 'availabilities'])
+            ->with(['mentorProfile', 'availabilities', 'penalties'])
             ->firstOrFail();
 
-        return view('mentors.show', compact('mentor'));
+        // Récupérer les avis récents
+        $recentReviews = Review::whereHas('session', function($query) use ($mentor) {
+            $query->where('mentor_id', $mentor->id);
+        })->with(['reviewer', 'session'])->latest()->take(5)->get();
+
+        return view('mentors.show', compact('mentor', 'recentReviews'));
     }
 
     /**
@@ -75,6 +81,12 @@ class MentorController extends Controller
                 'is_validated' => false, // Nécessite validation admin
             ]
         );
+
+        // Notifier tous les admins qu'un nouveau mentor attend validation
+        $admins = User::where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new \App\Notifications\MentorRegistrationPending($user));
+        }
 
         return back()->with('success', 'Profil mis à jour avec succès. En attente de validation.');
     }

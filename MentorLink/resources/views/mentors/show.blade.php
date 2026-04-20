@@ -65,6 +65,31 @@
                             <span class="text-muted">{{ $mentor->created_at->format('d/m/Y') }}</span>
                         </div>
                         
+                        <!-- Notation par étoiles -->
+                        <div class="mb-3">
+                            <strong>Évaluation :</strong><br>
+                            <div class="d-flex align-items-center">
+                                <div class="star-rating-display me-2">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        @if($i <= floor($mentor->average_rating))
+                                            <i class="fas fa-star text-warning"></i>
+                                        @elseif($i - 0.5 <= $mentor->average_rating)
+                                            <i class="fas fa-star-half-alt text-warning"></i>
+                                        @else
+                                            <i class="far fa-star text-muted"></i>
+                                        @endif
+                                    @endfor
+                                </div>
+                                <span class="fw-bold">{{ number_format($mentor->average_rating, 1) }}/5</span>
+                                <small class="text-muted ms-1">
+                                    ({{ $mentor->total_reviews }} {{ $mentor->total_reviews > 1 ? 'avis' : 'avis' }})
+                                </small>
+                            </div>
+                            @if($mentor->total_reviews == 0)
+                                <small class="text-muted">Nouveau mentor - Pas encore d'avis</small>
+                            @endif
+                        </div>
+                        
                         @if($mentor->bio)
                             <div class="mb-3">
                                 <strong>Bio :</strong><br>
@@ -121,10 +146,23 @@
                 @if($mentor->mentorProfile && $mentor->mentorProfile->is_validated)
                     <div class="d-grid gap-2">
                         @if($mentor->availabilities->count() > 0)
-                            <button class="btn btn-primary" disabled>
-                                <i class="fas fa-calendar-plus me-2"></i>Réserver une session
-                            </button>
-                            <small class="text-muted">Fonctionnalité à venir</small>
+                            @auth
+                                @if(auth()->user()->role === 'mentee')
+                                    <a href="{{ route('sessions.create', $mentor->id) }}" class="btn btn-primary">
+                                        <i class="fas fa-calendar-plus me-2"></i>Réserver une session
+                                    </a>
+                                @else
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Seuls les mentees peuvent réserver des sessions.
+                                    </div>
+                                @endif
+                            @else
+                                <a href="{{ route('login') }}?redirect=sessions.create&mentor_id={{ $mentor->id }}" class="btn btn-primary">
+                                    <i class="fas fa-calendar-plus me-2"></i>Réserver une session
+                                </a>
+                                <small class="text-muted">Connectez-vous pour réserver</small>
+                            @endauth
                         @else
                             <div class="alert alert-warning">
                                 <i class="fas fa-exclamation-triangle me-2"></i>
@@ -146,4 +184,76 @@
         </div>
     </div>
 </div>
+
+<!-- Section des avis récents -->
+@if($mentor->total_reviews > 0)
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-star me-2"></i>Avis récents
+                </h5>
+            </div>
+            <div class="card-body">
+                @if($recentReviews->count() > 0)
+                    @foreach($recentReviews as $review)
+                        <div class="review-item border-bottom pb-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="star-rating-small me-2">
+                                            @for($i = 1; $i <= 5; $i++)
+                                                @if($i <= $review->rating)
+                                                    <i class="fas fa-star text-warning"></i>
+                                                @else
+                                                    <i class="far fa-star text-muted"></i>
+                                                @endif
+                                            @endfor
+                                        </div>
+                                        <strong>{{ $review->reviewer->name }}</strong>
+                                        <small class="text-muted ms-2">
+                                            {{ $review->created_at->format('d/m/Y') }}
+                                        </small>
+                                    </div>
+                                    <p class="mb-0 text-muted">{{ $review->comment }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                    
+                    @if($mentor->total_reviews > 5)
+                        <div class="text-center">
+                            <small class="text-muted">
+                                Et {{ $mentor->total_reviews - 5 }} autre(s) avis...
+                            </small>
+                        </div>
+                    @endif
+                @else
+                    <div class="text-center text-muted py-3">
+                        <i class="fas fa-star fa-2x mb-2"></i>
+                        <p class="mb-0">Aucun avis pour le moment</p>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+@endif
+
+<style>
+.star-rating-display {
+    font-size: 1.2rem;
+}
+
+.star-rating-small {
+    font-size: 0.9rem;
+}
+
+.review-item:last-child {
+    border-bottom: none !important;
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+</style>
 @endsection

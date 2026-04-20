@@ -13,11 +13,25 @@ class MentorSession extends Model
 
     protected $table = 'mentor_sessions';
 
-    protected $fillable = ['mentor_id', 'mentee_id', 'scheduled_at', 'duration_min', 'status'];
+    protected $fillable = [
+        'mentor_id', 
+        'mentee_id', 
+        'scheduled_at', 
+        'duration_min', 
+        'status', 
+        'session_notes', 
+        'meeting_link',
+        'notification_1h_sent',
+        'notification_5m_sent',
+        'is_reviewed',
+        'completed_at'
+    ];
 
     protected $casts = [
         'scheduled_at' => 'datetime',
         'duration_min' => 'integer',
+        'completed_at' => 'datetime',
+        'is_reviewed' => 'boolean',
     ];
 
     public function mentor(): BelongsTo

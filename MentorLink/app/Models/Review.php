@@ -10,9 +10,16 @@ class Review extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['session_id', 'reviewer_id', 'rating', 'comment'];
+    protected $fillable = [
+        'session_id', 
+        'reviewer_id', 
+        'rating', 
+        'comment'
+    ];
 
-    protected $casts = ['rating' => 'integer'];
+    protected $casts = [
+        'rating' => 'integer'
+    ];
 
     public function session(): BelongsTo
     {

@@ -12,7 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Envoyer les rappels de session toutes les minutes
+        $schedule->command('sessions:send-reminders')->everyMinute();
     }
 
     /**

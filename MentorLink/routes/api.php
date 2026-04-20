@@ -10,21 +10,20 @@ use App\Http\Controllers\Api\SessionController;
 use Illuminate\Support\Facades\Route;
 
 // -----------------------------------------------------------------------
-// Routes d'authentification — gérées par Laravel Breeze (stack API)
-// Les contrôleurs sont dans App\Http\Controllers\Auth\
-// -----------------------------------------------------------------------
-require __DIR__ . '/auth.php';
-
-// -----------------------------------------------------------------------
-// Routes publiques
+// Routes publiques API (si nécessaire pour des intégrations futures)
 // -----------------------------------------------------------------------
 Route::get('/mentors',                        [MentorController::class, 'index']);
 Route::get('/mentors/{id}',                   [MentorController::class, 'show']);
 Route::get('/mentors/{mentorId}/reviews',     [ReviewController::class, 'indexForMentor']);
 
+// Session reminders (nécessite une session web active)
+Route::middleware('web')->get('/session-reminders', [App\Http\Controllers\Api\SessionReminderController::class, 'index']);
+
 // -----------------------------------------------------------------------
-// Routes authentifiées (Sanctum)
+// Routes authentifiées API (Sanctum) - Désactivées pour l'instant
+// Nous utilisons maintenant les routes web avec Laravel Breeze
 // -----------------------------------------------------------------------
+/*
 Route::middleware('auth:sanctum')->group(function () {
 
     // Profil utilisateur connecté
@@ -63,3 +62,4 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/reports/{report}',      [ReportController::class, 'update']);
     });
 });
+*/

@@ -63,6 +63,35 @@
                             <small class="text-muted">{{ $mentor->email }}</small>
                         </div>
                         
+                        <!-- Notation par étoiles -->
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center">
+                                <div class="star-rating-display me-2">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        @if($i <= floor($mentor->average_rating))
+                                            <i class="fas fa-star text-warning"></i>
+                                        @elseif($i - 0.5 <= $mentor->average_rating)
+                                            <i class="fas fa-star-half-alt text-warning"></i>
+                                        @else
+                                            <i class="far fa-star text-muted"></i>
+                                        @endif
+                                    @endfor
+                                </div>
+                                <span class="fw-bold">{{ number_format($mentor->average_rating, 1) }}</span>
+                                <small class="text-muted ms-1">
+                                    ({{ $mentor->total_reviews }} {{ $mentor->total_reviews > 1 ? 'avis' : 'avis' }})
+                                </small>
+                                @if($mentor->penalties && $mentor->penalties->count() > 0)
+                                    <small class="text-warning ms-2" title="Ce mentor a {{ $mentor->penalties->count() }} pénalité(s)">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                    </small>
+                                @endif
+                            </div>
+                            @if($mentor->total_reviews == 0)
+                                <small class="text-muted">Nouveau mentor - Pas encore d'avis</small>
+                            @endif
+                        </div>
+                        
                         @if($mentor->mentorProfile)
                             <div class="mb-3">
                                 <strong>Domaines d'expertise :</strong><br>
