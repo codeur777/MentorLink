@@ -42,6 +42,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/pending-mentors',       [AdminController::class, 'pendingMentors']);
         Route::put('/mentors/{id}/validate', [MentorController::class, 'validateProfile']);
     });
+});
+
 Route::get('/platform-overview', function () {
     $databaseName = config('database.connections.mysql.database');
     $connected = false;

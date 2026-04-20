@@ -7,10 +7,11 @@ use App\Http\Controllers\Web\MentorController;
 use App\Http\Controllers\Web\ReportController;
 use App\Http\Controllers\Web\ReviewController;
 use App\Http\Controllers\Web\SessionController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    if (auth()->check()) {
+    if (Auth::check()) {
         return redirect()->route('dashboard');
     }
     return view('welcome');
@@ -70,7 +71,6 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__ . '/auth.php';
 use App\Http\Controllers\FrontendController;
-use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
