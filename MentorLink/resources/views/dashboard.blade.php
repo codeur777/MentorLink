@@ -7,35 +7,41 @@
 </head>
 <body>
     <h1>Dashboard MentorLink</h1>
-    <p>Bienvenue {{ $user->name }} ({{ ucfirst($user->role) }})</p>
-    
+    <p>Bienvenue <strong>{{ $user->name }}</strong> ({{ ucfirst($user->role) }})</p>
+
     <nav>
-        <a href="{{ route('mentors.index') }}">Liste des mentors</a> |
-        @if($user->role === 'mentor')
-            <a href="{{ route('mentor.profile') }}">Mon profil mentor</a> |
+        <a href="{{ route('mentors.index') }}">Mentors</a>
+        @if($user->isMentor())
+            | <a href="{{ route('mentor.profile') }}">Mon profil</a>
+            | <a href="{{ route('availabilities.create') }}">Mes disponibilités</a>
         @endif
-        @if($user->role === 'admin')
-            <a href="{{ route('admin.dashboard') }}">Admin</a> |
+        | <a href="{{ route('sessions.index') }}">Mes sessions</a>
+        @if($user->isAdmin())
+            | <a href="{{ route('admin.dashboard') }}">Admin</a>
         @endif
+        &nbsp;
         <form method="POST" action="{{ route('logout') }}" style="display: inline;">
             @csrf
             <button type="submit">Déconnexion</button>
         </form>
     </nav>
-    
+
     @if(session('success'))
-        <div style="color: green;">{{ session('success') }}</div>
+        <div style="color: green; margin: 10px 0;">{{ session('success') }}</div>
     @endif
-    
     @if(session('error'))
-        <div style="color: red;">{{ session('error') }}</div>
+        <div style="color: red; margin: 10px 0;">{{ session('error') }}</div>
     @endif
-    
+
     <h2>Statistiques</h2>
-    <ul>
-        @foreach($stats as $key => $value)
-            <li>{{ ucfirst(str_replace('_', ' ', $key)) }}: {{ $value }}</li>
-        @endforeach
-    </ul>
+    @if(count($stats) > 0)
+        <ul>
+            @foreach($stats as $key => $value)
+                <li>{{ ucfirst(str_replace('_', ' ', $key)) }} : {{ $value }}</li>
+            @endforeach
+        </ul>
+    @else
+        <p>Aucune statistique disponible.</p>
+    @endif
 </body>
 </html>
