@@ -15,14 +15,7 @@ class DashboardController extends Controller
         $stats = [];
 
         if ($user->isAdmin()) {
-            $stats = [
-                'total_users'       => User::count(),
-                'total_mentors'     => User::where('role', 'mentor')->count(),
-                'total_mentees'     => User::where('role', 'mentee')->count(),
-                'pending_mentors'   => MentorProfile::where('is_validated', false)->count(),
-                'validated_mentors' => MentorProfile::where('is_validated', true)->count(),
-                'total_sessions'    => Session::count(),
-            ];
+            return redirect()->route('admin.dashboard');
         } elseif ($user->isMentor()) {
             $stats = [
                 'profile_status'       => $user->mentorProfile?->is_validated ? 'Valide' : 'En attente',
