@@ -81,6 +81,61 @@
 @else
     <!-- Layout original pour admin et mentor -->
     
+    @if($user->role === 'mentor' && !$user->mentorProfile)
+        <!-- Alerte pour les mentors sans profil -->
+        <div class="alert alert-warning alert-dismissible fade show mb-4" role="alert">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="fas fa-exclamation-triangle fa-2x"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h5 class="alert-heading mb-2">
+                        <i class="fas fa-user-edit me-2"></i>Complétez votre profil mentor
+                    </h5>
+                    <p class="mb-2">
+                        Pour commencer à recevoir des demandes de mentorat, vous devez :
+                    </p>
+                    <ul class="mb-3">
+                        <li><strong>Remplir vos domaines d'expertise</strong> et votre tarif horaire</li>
+                        <li><strong>Définir vos disponibilités</strong> dans votre agenda</li>
+                    </ul>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="{{ route('mentor.profile') }}" class="btn btn-warning">
+                            <i class="fas fa-user-edit me-2"></i>Gérer mon profil
+                        </a>
+                        <a href="{{ route('availabilities.create') }}" class="btn btn-outline-warning">
+                            <i class="fas fa-calendar-plus me-2"></i>Ajouter mes disponibilités
+                        </a>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    @elseif($user->role === 'mentor' && $user->mentorProfile && !$user->mentorProfile->is_validated)
+        <!-- Alerte pour les mentors avec profil en attente -->
+        <div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+            <div class="d-flex align-items-center">
+                <div class="me-3">
+                    <i class="fas fa-clock fa-2x"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h5 class="alert-heading mb-2">
+                        <i class="fas fa-hourglass-half me-2"></i>Profil en cours de validation
+                    </h5>
+                    <p class="mb-2">
+                        Votre profil mentor a été soumis et est en cours de validation par notre équipe.
+                    </p>
+                    <p class="mb-0">
+                        <small class="text-muted">
+                            Vous recevrez une notification dès que votre profil sera validé.
+                        </small>
+                    </p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    @endif
+    
     <!-- Statistiques -->
     @if(count($stats) > 0)
     <div class="row mb-4">

@@ -59,7 +59,11 @@ class AdminController extends Controller
         $profile = MentorProfile::where('user_id', $id)->firstOrFail();
         $profile->update(['is_validated' => true]);
 
-        return back()->with('success', 'Profil mentor validé avec succès.');
+        // Envoyer une notification au mentor
+        $mentor = $profile->user;
+        $mentor->notify(new \App\Notifications\MentorProfileValidated($mentor));
+
+        return back()->with('success', 'Profil mentor validé avec succès. Le mentor a été notifié.');
     }
 
     /**
@@ -72,9 +76,14 @@ class AdminController extends Controller
         }
 
         $profile = MentorProfile::where('user_id', $id)->firstOrFail();
+        $mentor = $profile->user;
+        
+        // Envoyer une notification au mentor avant de supprimer le profil
+        $mentor->notify(new \App\Notifications\MentorProfileRejected($mentor));
+        
         $profile->delete();
 
-        return back()->with('success', 'Profil mentor rejeté et supprimé.');
+        return back()->with('success', 'Profil mentor rejeté et supprimé. Le mentor a été notifié.');
     }
 
     /**

@@ -50,7 +50,7 @@ class ReviewController extends Controller
         }
 
         // Créer l'avis
-        Review::create([
+        $review = Review::create([
             'session_id' => $session->id,
             'reviewer_id' => Auth::id(),
             'rating' => $request->rating,
@@ -62,6 +62,9 @@ class ReviewController extends Controller
 
         // Mettre à jour la note moyenne du mentor
         $this->updateMentorRating($session->mentor);
+
+        // Notifier le mentor qu'il a reçu un avis
+        $session->mentor->notify(new \App\Notifications\ReviewReceived($review, $session));
 
         return redirect()->route('sessions.show', $session)
             ->with('success', 'Merci pour votre avis ! Il aidera d\'autres étudiants à choisir ce mentor.');

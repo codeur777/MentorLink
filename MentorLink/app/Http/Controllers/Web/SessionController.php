@@ -109,6 +109,10 @@ class SessionController extends Controller
             'session_notes' => $request->session_notes,
         ]);
 
+        // Notifier le mentor de la nouvelle demande
+        $mentor = User::find($request->mentor_id);
+        $mentor->notify(new \App\Notifications\SessionRequested($session));
+
         return redirect()->route('sessions.show', $session)
             ->with('success', 'Votre demande de session a été envoyée au mentor.');
     }
@@ -239,6 +243,9 @@ class SessionController extends Controller
             'completed_at' => Carbon::now()
         ]);
 
-        return back()->with('success', 'Session marquée comme terminée. Le mentee peut maintenant laisser un avis.');
+        // Notifier le mentee que la session est terminée
+        $session->mentee->notify(new \App\Notifications\SessionCompleted($session));
+
+        return back()->with('success', 'Session marquée comme terminée. Le mentee a été notifié et peut maintenant laisser un avis.');
     }
 }
