@@ -14,7 +14,17 @@ Route::get('/', function () {
     if (Auth::check()) {
         return redirect()->route('dashboard');
     }
-    return view('welcome');
+
+    // Top 3 mentors les mieux notés
+    $topMentors = \App\Models\User::where('role', 'mentor')
+        ->whereHas('mentorProfile', fn($q) => $q->where('is_validated', true))
+        ->with(['mentorProfile'])
+        ->get()
+        ->sortByDesc(fn($u) => optional($u->mentorProfile)->average_rating)
+        ->take(3)
+        ->values();
+
+    return view('welcome', compact('topMentors'));
 });
 
 Route::middleware('auth')->group(function () {
@@ -37,12 +47,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/availabilities/{availability}',  [AvailabilityController::class, 'destroy'])->name('availabilities.destroy');
 
     // Sessions
-    Route::get('/sessions',                      [SessionController::class, 'index'])->name('sessions.index');
-    Route::get('/sessions/book',                 [SessionController::class, 'create'])->name('sessions.create');
-    Route::post('/sessions',                     [SessionController::class, 'store'])->name('sessions.store');
-    Route::patch('/sessions/{session}/confirm',  [SessionController::class, 'confirm'])->name('sessions.confirm');
-    Route::patch('/sessions/{session}/cancel',   [SessionController::class, 'cancel'])->name('sessions.cancel');
-    Route::patch('/sessions/{session}/complete', [SessionController::class, 'complete'])->name('sessions.complete');
+    Route::get('/sessions',                        [SessionController::class, 'index'])->name('sessions.index');
+    Route::get('/sessions/book',                   [SessionController::class, 'create'])->name('sessions.create');
+    Route::post('/sessions',                       [SessionController::class, 'store'])->name('sessions.store');
+    Route::patch('/sessions/{session}/confirm',    [SessionController::class, 'confirm'])->name('sessions.confirm');
+    Route::patch('/sessions/{session}/cancel',     [SessionController::class, 'cancel'])->name('sessions.cancel');
+    Route::patch('/sessions/{session}/complete',   [SessionController::class, 'complete'])->name('sessions.complete');
+    Route::get('/sessions/{session}/meeting',      [SessionController::class, 'meeting'])->name('sessions.meeting');
 
     // Reviews
     Route::get('/sessions/{session}/review',  [ReviewController::class, 'create'])->name('reviews.create');

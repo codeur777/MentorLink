@@ -52,8 +52,8 @@ class AvailabilityService
                 'availability_id' => $availability->id,
                 'date'            => $dateStr,
                 'day_of_week'     => $availability->day_of_week,
-                'start_time'      => $availability->start_time,
-                'end_time'        => $availability->end_time,
+                'start_time'      => substr($availability->start_time, 0, 5), // H:i uniquement
+                'end_time'        => substr($availability->end_time, 0, 5),   // H:i uniquement
                 'booked'          => $booked,
             ];
         }
@@ -75,8 +75,8 @@ class AvailabilityService
         // 1. Must match an availability window
         $covered = Availability::where('mentor_id', $mentorId)
             ->where('day_of_week', $dayOfWeek)
-            ->where('start_time', '<=', $startTime)
-            ->where('end_time', '>=', $endTime)
+            ->whereRaw('TIME_FORMAT(start_time, "%H:%i") <= ?', [$startTime])
+            ->whereRaw('TIME_FORMAT(end_time, "%H:%i") >= ?', [$endTime])
             ->exists();
 
         if (! $covered) {
@@ -87,8 +87,8 @@ class AvailabilityService
         $conflict = Session::where('mentor_id', $mentorId)
             ->where('date', $date)
             ->whereIn('status', ['pending', 'confirmed'])
-            ->where('start_time', '<', $endTime)
-            ->where('end_time', '>', $startTime)
+            ->whereRaw('TIME_FORMAT(start_time, "%H:%i") < ?', [$endTime])
+            ->whereRaw('TIME_FORMAT(end_time, "%H:%i") > ?', [$startTime])
             ->exists();
 
         return ! $conflict;

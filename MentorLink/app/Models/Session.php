@@ -21,6 +21,7 @@ class Session extends Model
         'end_time',
         'status',
         'note',
+        'meeting_room_id',
     ];
 
     protected $casts = [

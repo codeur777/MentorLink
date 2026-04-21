@@ -1,55 +1,103 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="theme-color" content="#0f766e">
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MentorLink — @yield('title', 'Plateforme de mentorat')</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        oxford: '#0B0829',
+                        orange: '#FF8400',
+                        vista:  '#8FA0D8',
+                        almond: '#F9DFC6',
+                        silver: '#D9D9D9',
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-silver min-h-screen flex flex-col">
 
-        <title>{{ $pageTitle ?? $platform['name'] }}</title>
+    {{-- NAVBAR --}}
+    <nav class="bg-oxford sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
 
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=manrope:400,500,600,700,800|sora:400,600,700,800&display=swap" rel="stylesheet" />
-
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body>
-        <div class="page-shell" @isset($platformEndpoint) data-platform-endpoint="{{ $platformEndpoint }}" @endisset>
-            <div class="ambient ambient-left"></div>
-            <div class="ambient ambient-right"></div>
-
-            <header class="site-header">
-                <a href="{{ route('landing') }}" class="brand">
-                    <span class="brand-mark">ML</span>
-                    <span>
-                        <strong>{{ $platform['name'] }}</strong>
-                        <small>{{ $platform['tagline'] }}</small>
-                    </span>
-                </a>
-
-                <nav class="site-nav" aria-label="Navigation principale">
-                    <a href="{{ route('landing') }}" @class(['is-active' => request()->routeIs('landing')])>Accueil</a>
-                    <a href="{{ route('mentors.index') }}" @class(['is-active' => request()->routeIs('mentors.index')])>Mentors</a>
-                    <a href="{{ route('dashboard.preview') }}" @class(['is-active' => request()->routeIs('dashboard.preview')])>Suivi</a>
-                    <a href="{{ route('access.index') }}" @class(['is-active' => request()->routeIs('access.index')])>Commencer</a>
-                </nav>
-
-                <div class="header-actions">
-                    @isset($headerAction)
-                        {!! $headerAction !!}
-                    @else
-                        <a href="{{ route('dashboard.preview') }}" class="button button-secondary">Voir le suivi</a>
-                    @endisset
+            <a href="/" class="flex items-center gap-2">
+                <div class="w-9 h-9 bg-orange rounded-xl flex items-center justify-center">
+                    <span class="text-oxford font-bold text-sm">ML</span>
                 </div>
-            </header>
+                <span class="text-white font-bold text-xl tracking-tight">
+                    Mentor<span class="text-orange">Link</span>
+                </span>
+            </a>
 
-            <main>
-                @yield('content')
-            </main>
+            <div class="flex items-center gap-6">
+                @auth
+                    @if(auth()->user()->isMentee())
+                        <a href="{{ route('mentors.index') }}" class="text-vista hover:text-white text-sm transition">Mentors</a>
+                        <a href="{{ route('sessions.index') }}" class="text-vista hover:text-white text-sm transition">Mes sessions</a>
+                    @elseif(auth()->user()->isMentor())
+                        <a href="{{ route('mentor.profile') }}" class="text-vista hover:text-white text-sm transition">Mon profil</a>
+                        <a href="{{ route('sessions.index') }}" class="text-vista hover:text-white text-sm transition">Mes sessions</a>
+                        <a href="{{ route('availabilities.create') }}" class="text-vista hover:text-white text-sm transition">Disponibilités</a>
+                    @endif
 
-            <footer class="site-footer">
-                <p>{{ $platform['footer'] }}</p>
-                <span>&copy; {{ now()->year }} {{ $platform['name'] }}</span>
-            </footer>
+                    <div class="flex items-center gap-3 pl-4 border-l border-white/20">
+                        <div class="w-9 h-9 rounded-full bg-orange flex items-center justify-center font-bold text-oxford text-sm">
+                            {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+                        </div>
+                        <div>
+                            <p class="text-white text-xs font-semibold">{{ auth()->user()->name }}</p>
+                            <p class="text-vista text-xs capitalize">{{ auth()->user()->role }}</p>
+                        </div>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button class="text-vista hover:text-red-400 text-xs transition ml-2">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                            </button>
+                        </form>
+                    </div>
+                @endauth
+            </div>
         </div>
-    </body>
+    </nav>
+
+    {{-- FLASH MESSAGES --}}
+    @if(session('success'))
+        <div class="bg-green-50 border-l-4 border-green-500 text-green-700 px-6 py-3 text-sm flex items-center gap-2">
+            <i class="fa-solid fa-circle-check"></i> {{ session('success') }}
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="bg-red-50 border-l-4 border-red-500 text-red-600 px-6 py-3 text-sm flex items-center gap-2">
+            <i class="fa-solid fa-circle-exclamation"></i> {{ session('error') }}
+        </div>
+    @endif
+
+    {{-- CONTENU --}}
+    <main class="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
+        @yield('content')
+    </main>
+
+    {{-- FOOTER --}}
+    <footer class="bg-oxford mt-auto">
+        <div class="max-w-7xl mx-auto px-6 py-6 text-center">
+            <span class="text-white font-bold">Mentor<span class="text-orange">Link</span></span>
+            <p class="text-vista/50 text-xs mt-1">© 2026 — Plateforme de mentorat académique</p>
+        </div>
+    </footer>
+
+    @stack('scripts')
+</body>
 </html>

@@ -16,6 +16,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('admin', function ($user) {
             return $user->isAdmin();
         });
+
         Schema::defaultStringLength(191);
+
     }
 }
