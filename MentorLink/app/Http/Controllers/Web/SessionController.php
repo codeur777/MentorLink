@@ -7,12 +7,16 @@ use App\Http\Requests\StoreSessionRequest;
 use App\Models\Session;
 use App\Models\User;
 use App\Services\AvailabilityService;
+use App\Services\MeetingService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class SessionController extends Controller
 {
-    public function __construct(private AvailabilityService $availabilityService) {}
+    public function __construct(
+        private AvailabilityService $availabilityService,
+        private MeetingService $meetingService,
+    ) {}
 
     /**
      * List sessions for the authenticated user.
@@ -101,13 +105,21 @@ class SessionController extends Controller
     }
 
     /**
-     * Mentor confirms a pending session.
+     * Mentor confirms a pending session — generates the meeting room at this point.
      */
     public function confirm(Session $session)
     {
         $this->authorize('confirm', $session);
-        $session->update(['status' => 'confirmed']);
-        return back()->with('success', 'Session confirmee.');
+
+        // Load relationships needed to build the room slug
+        $session->load(['mentor', 'mentee']);
+
+        $session->update([
+            'status'          => 'confirmed',
+            'meeting_room_id' => $this->meetingService->generateRoomId($session),
+        ]);
+
+        return back()->with('success', 'Session confirmée. Le lien de visioconférence est maintenant disponible.');
     }
 
     /**
@@ -128,5 +140,22 @@ class SessionController extends Controller
         $this->authorize('complete', $session);
         $session->update(['status' => 'completed']);
         return back()->with('success', 'Session marquee comme terminee.');
+    }
+
+    /**
+     * Show the in-app Jitsi meeting room for a confirmed session.
+     * Access is restricted to the mentor and mentee of the session.
+     */
+    public function meeting(Session $session)
+    {
+        $this->authorize('joinMeeting', $session);
+
+        $session->load(['mentor', 'mentee']);
+
+        $roomUrl   = $this->meetingService->getRoomUrl($session);
+        $serverUrl = $this->meetingService->getServerUrl();
+        $user      = auth()->user();
+
+        return view('sessions.meeting', compact('session', 'roomUrl', 'serverUrl', 'user'));
     }
 }

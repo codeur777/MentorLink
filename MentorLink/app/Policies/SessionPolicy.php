@@ -25,4 +25,12 @@ class SessionPolicy
     {
         return $user->id === $session->mentor_id && $session->isConfirmed();
     }
+
+    /** Mentor or mentee can join the meeting room (session must be confirmed and have a room) */
+    public function joinMeeting(User $user, Session $session): bool
+    {
+        return in_array($user->id, [$session->mentor_id, $session->mentee_id])
+            && $session->isConfirmed()
+            && $session->meeting_room_id !== null;
+    }
 }

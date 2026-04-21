@@ -80,6 +80,15 @@
                             @endif
                         @endif
 
+                        {{-- Rejoindre la réunion (session confirmée uniquement) --}}
+                        @if($session->isConfirmed() && $session->meeting_room_id)
+                            <a href="{{ route('sessions.meeting', $session) }}"
+                               class="bg-green-500 text-white text-xs font-semibold px-3 py-1.5 rounded-xl hover:bg-green-600 transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-video"></i>
+                                Rejoindre
+                            </a>
+                        @endif
+
                         {{-- Annuler --}}
                         @if(in_array($session->status, ['pending', 'confirmed']))
                             <form method="POST" action="{{ route('sessions.cancel', $session) }}">

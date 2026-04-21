@@ -46,12 +46,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/availabilities/{availability}',  [AvailabilityController::class, 'destroy'])->name('availabilities.destroy');
 
     // Sessions
-    Route::get('/sessions',                      [SessionController::class, 'index'])->name('sessions.index');
-    Route::get('/sessions/book',                 [SessionController::class, 'create'])->name('sessions.create');
-    Route::post('/sessions',                     [SessionController::class, 'store'])->name('sessions.store');
-    Route::patch('/sessions/{session}/confirm',  [SessionController::class, 'confirm'])->name('sessions.confirm');
-    Route::patch('/sessions/{session}/cancel',   [SessionController::class, 'cancel'])->name('sessions.cancel');
-    Route::patch('/sessions/{session}/complete', [SessionController::class, 'complete'])->name('sessions.complete');
+    Route::get('/sessions',                        [SessionController::class, 'index'])->name('sessions.index');
+    Route::get('/sessions/book',                   [SessionController::class, 'create'])->name('sessions.create');
+    Route::post('/sessions',                       [SessionController::class, 'store'])->name('sessions.store');
+    Route::patch('/sessions/{session}/confirm',    [SessionController::class, 'confirm'])->name('sessions.confirm');
+    Route::patch('/sessions/{session}/cancel',     [SessionController::class, 'cancel'])->name('sessions.cancel');
+    Route::patch('/sessions/{session}/complete',   [SessionController::class, 'complete'])->name('sessions.complete');
+    Route::get('/sessions/{session}/meeting',      [SessionController::class, 'meeting'])->name('sessions.meeting');
 
     // Reviews
     Route::get('/sessions/{session}/review',  [ReviewController::class, 'create'])->name('reviews.create');
