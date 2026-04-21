@@ -123,12 +123,10 @@
     $totalMentors  = 0;
     $totalSessions = 0;
     $avgRating     = null;
-    try {
-        $totalMentors  = \App\Models\User::where('role','mentor')->count();
-        $totalSessions = \App\Models\Session::where('status','terminee')->count();
-        $avgRating     = \App\Models\Review::avg('rating');
-    } catch (\Exception $e) {}
-@endphp
+    $totalMentors  = \App\Models\User::where('role','mentor')->count();
+    $totalSessions = \App\Models\Session::where('status','completed')->count();
+    $avgRating     = \App\Models\Review::avg('rating');
+            @endphp
             <div class="bg-white/5 border border-vista/20 rounded-2xl p-8 text-center hover:border-orange/30 transition">
                 <div class="text-5xl font-extrabold text-orange mb-2">{{ $totalMentors }}</div>
                 <div class="text-vista text-sm">Mentors actifs</div>
