@@ -4,8 +4,8 @@
 @section('content')
 
 <div class="mb-8">
-    <h1 class="text-2xl font-extrabold text-oxford">Bonjour, {{ $user->name }} 👋</h1>
-    <p class="text-gray-500 text-sm mt-1 capitalize">{{ $user->role }} — Bienvenue sur MentorLink</p>
+    <h1 class="text-2xl font-extrabold text-oxford">Bonjour, {{ $user->name }} </h1>
+    <p class="text-gray-500 text-sm mt-1 capitalize">{{ $user->role }} - Bienvenue sur MentorLink</p>
 </div>
 
 {{-- Cartes stats --}}
